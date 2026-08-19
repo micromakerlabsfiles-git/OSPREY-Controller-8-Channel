@@ -1,0 +1,2974 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Osprey Controller Web Manager</title>
+  <!-- Outfit & JetBrains Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- ESP Web Serial Flasher Installer Component -->
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+
+
+  <style>
+    :root {
+      /* Light Theme Variables */
+      --bg-color: #f4f5f8;
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --text-main: #1e1f29;
+      --text-muted: #6b6d85;
+      --accent: #ff6b35;
+      /* Osprey Orange */
+      --accent-glow: rgba(255, 107, 53, 0.12);
+      --teal: #007a8a;
+      /* High contrast teal */
+      --teal-glow: rgba(0, 122, 138, 0.12);
+      --success: #2a9d8f;
+      --error: #e63946;
+      --border-radius: 12px;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+      --console-bg: #f8f9fa;
+      --console-text: #1e1f29;
+      --log-tx-color: #2e7d32;
+      --log-rx-color: #1565c0;
+      --log-sys-color: #b36f00;
+      --log-err-color: #c62828;
+
+      --radial-glow-top: radial-gradient(circle, rgba(255, 107, 53, 0.08) 0%, rgba(0, 0, 0, 0) 70%);
+      --radial-glow-bottom: radial-gradient(circle, rgba(0, 122, 138, 0.06) 0%, rgba(0, 0, 0, 0) 70%);
+
+      --btn-sec-bg: #ffffff;
+      --btn-sec-text: #1e1f29;
+      --btn-sec-border: rgba(0, 0, 0, 0.08);
+      --input-bg: #ffffff;
+      --input-focus-bg: #ffffff;
+      --reorder-hover-bg: rgba(0, 0, 0, 0.02);
+    }
+
+    body.dark-theme {
+      /* Dark Theme Variables */
+      --bg-color: #0b0c10;
+      --card-bg: rgba(26, 26, 36, 0.65);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f0f0f5;
+      --text-muted: #9fa0b5;
+      --accent: #ff6b35;
+      --accent-glow: rgba(255, 107, 53, 0.25);
+      --teal: #4ad2e4;
+      --teal-glow: rgba(74, 210, 228, 0.2);
+      --success: #4ade80;
+      --error: #f87171;
+
+      --console-bg: #11111a;
+      --console-text: #e0e0e9;
+      --log-tx-color: #4ade80;
+      --log-rx-color: #60a5fa;
+      --log-sys-color: #facc15;
+      --log-err-color: #f87171;
+
+      --radial-glow-top: radial-gradient(circle, rgba(255, 107, 53, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+      --radial-glow-bottom: radial-gradient(circle, rgba(74, 210, 228, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+
+      --btn-sec-bg: rgba(255, 255, 255, 0.05);
+      --btn-sec-text: #f0f0f5;
+      --btn-sec-border: rgba(255, 255, 255, 0.08);
+      --input-bg: rgba(255, 255, 255, 0.02);
+      --input-focus-bg: rgba(255, 255, 255, 0.04);
+      --reorder-hover-bg: rgba(255, 255, 255, 0.02);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Soft background glows */
+    .glow-bg {
+      position: fixed;
+      width: 400px;
+      height: 400px;
+      background: var(--radial-glow-top);
+      top: -150px;
+      right: -100px;
+      z-index: -1;
+      pointer-events: none;
+      transition: background 0.3s ease;
+    }
+
+    .glow-bg-bottom {
+      position: fixed;
+      width: 400px;
+      height: 400px;
+      background: var(--radial-glow-bottom);
+      bottom: -150px;
+      left: -100px;
+      z-index: -1;
+      pointer-events: none;
+      transition: background 0.3s ease;
+    }
+
+    header {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-logo h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn-theme-toggle {
+      background: var(--btn-sec-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+    }
+
+    .btn-theme-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: rotate(15deg);
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--btn-sec-bg);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--error);
+      box-shadow: 0 0 6px var(--error);
+    }
+
+    .status-badge.connected .status-dot {
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.05);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+    }
+
+    body.dark-theme .nav-tabs {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-tab {
+      padding: 7px 16px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .nav-tab:hover {
+      color: var(--text-main);
+    }
+
+    .nav-tab.active {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+    }
+
+    /* User Manual Section Container */
+    .manual-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        gap: 12px;
+        padding: 1rem;
+      }
+
+      .nav-tabs {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* Connection Card Styling */
+    .login-container {
+      max-width: 480px;
+      width: 90%;
+      margin: auto;
+      padding: 2rem 0;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+    }
+
+    .login-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto;
+      background: var(--accent-glow);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+
+    .login-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .login-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Main Dashboard Layout */
+    .main-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+      display: none;
+      /* Hidden by default until login */
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      flex-grow: 1;
+    }
+
+    @media (max-width: 900px) {
+      .main-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--border-radius);
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+      transition: var(--transition), background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(0, 0, 0, 0.15);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    body.dark-theme .card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.75rem;
+    }
+
+    .card-title svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--accent);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+    }
+
+    input[type="text"] {
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: var(--transition), background-color 0.3s ease;
+      width: 100%;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: var(--input-focus-bg);
+      box-shadow: 0 0 10px rgba(255, 107, 53, 0.1);
+    }
+
+    select.form-select {
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: var(--transition), background-color 0.3s ease;
+      width: 100%;
+      cursor: pointer;
+      outline: none;
+    }
+
+    select.form-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(255, 107, 53, 0.1);
+    }
+
+    select.form-select option {
+      background: var(--bg-color);
+      color: var(--text-main);
+    }
+
+    /* Custom Radio Buttons for Menu Style */
+    .style-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .style-option {
+      position: relative;
+    }
+
+    .style-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .style-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: var(--transition), background-color 0.3s ease;
+      color: var(--text-muted);
+    }
+
+    .style-option input[type="radio"]:checked+.style-label {
+      border-color: var(--teal);
+      background: var(--reorder-hover-bg);
+      color: var(--teal);
+      box-shadow: 0 0 10px rgba(0, 122, 138, 0.08);
+    }
+
+    /* Slider styling */
+    .range-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .range-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .range-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--teal);
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.08);
+      outline: none;
+      transition: var(--transition);
+    }
+
+    body.dark-theme input[type="range"] {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(255, 107, 53, 0.4);
+      transition: var(--transition);
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    /* Toggle Switch */
+    .switch-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      padding: 12px 16px;
+      border-radius: 8px;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.08);
+      transition: .3s;
+      border-radius: 24px;
+    }
+
+    body.dark-theme .slider {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    input:checked+.slider {
+      background-color: var(--success);
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(24px);
+    }
+
+    /* Reorder List Layout */
+    .reorder-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .reorder-list .reorder-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      padding: 10px 14px;
+      border-radius: 8px;
+      transition: var(--transition), background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .reorder-list .reorder-item:hover {
+      background: var(--reorder-hover-bg);
+      border-color: rgba(0, 0, 0, 0.15);
+    }
+
+    body.dark-theme .reorder-list .reorder-item:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .reorder-list .reorder-item.locked {
+      background: rgba(255, 107, 53, 0.02);
+      border-color: rgba(255, 107, 53, 0.15);
+    }
+
+    .item-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .reorder-item.locked .item-label {
+      color: var(--accent);
+    }
+
+    .item-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-arrow {
+      background: var(--btn-sec-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .btn-arrow:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+
+    .btn-arrow:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+      background: rgba(0, 0, 0, 0.05);
+      border-color: transparent;
+      box-shadow: none;
+      color: var(--text-muted);
+    }
+
+    /* Master controls and buttons */
+    .button-group {
+      grid-column: span 2;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    /* Mobile Responsiveness Improvements */
+    @media (max-width: 768px) {
+      header {
+        padding: 0.75rem 1rem;
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
+      }
+
+      .header-logo {
+        justify-content: center;
+      }
+
+      .header-logo h1 {
+        font-size: 1.15rem;
+      }
+
+      .header-controls {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .main-container {
+        grid-template-columns: 1fr;
+        padding: 0 0.75rem;
+        margin: 1rem auto;
+        gap: 1rem;
+      }
+
+      .card {
+        padding: 1.25rem 1rem;
+        gap: 1rem;
+        border-radius: 10px;
+      }
+
+      .card[style*="grid-column: span 2"] {
+        grid-column: span 1 !important;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      .style-selector {
+        grid-template-columns: 1fr;
+      }
+
+      .login-card {
+        padding: 1.75rem 1.25rem;
+      }
+
+      .login-container {
+        padding: 1rem 0;
+        width: 95%;
+      }
+
+      .button-group {
+        grid-column: span 1;
+        flex-direction: column;
+        width: 100%;
+        gap: 0.75rem;
+      }
+
+      .button-group .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .reorder-list {
+        max-height: 280px;
+      }
+
+      .reorder-list .reorder-item {
+        padding: 8px 10px;
+      }
+
+      .item-label {
+        font-size: 0.8rem;
+      }
+
+      .btn-arrow {
+        width: 32px;
+        height: 32px;
+      }
+
+      .add-option-container {
+        flex-direction: column;
+        align-items: stretch !important;
+      }
+
+      .add-option-container select.form-select {
+        max-width: 100% !important;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .button-group {
+        grid-column: span 1;
+      }
+    }
+
+    .btn {
+      padding: 10px 20px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      border: 1px solid transparent;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    .btn-primary:hover {
+      background: #ff8559;
+      box-shadow: 0 6px 20px var(--accent-glow);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: var(--btn-sec-bg);
+      color: var(--btn-sec-text);
+      border-color: var(--btn-sec-border);
+    }
+
+    .btn-secondary:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .btn-disconnect {
+      background: transparent;
+      border: 1px solid var(--error);
+      color: var(--error);
+      display: none;
+      /* Shown only when connected */
+    }
+
+    .btn-disconnect:hover {
+      background: var(--error);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    /* Console logs Card */
+    .console-card {
+      grid-column: span 2;
+    }
+
+    @media (max-width: 900px) {
+      .console-card {
+        grid-column: span 1;
+      }
+    }
+
+    .console-log {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      background: var(--console-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px;
+      height: 180px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      color: var(--console-text);
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+
+    .log-tx {
+      color: var(--log-tx-color);
+      font-weight: 600;
+    }
+
+    .log-rx {
+      color: var(--log-rx-color);
+      font-weight: 600;
+    }
+
+    .log-sys {
+      color: var(--log-sys-color);
+      font-weight: 600;
+    }
+
+    .log-err {
+      color: var(--log-err-color);
+      font-weight: 600;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--card-border);
+      background: var(--btn-sec-bg);
+      margin-top: auto;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.01);
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.2);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="glow-bg"></div>
+  <div class="glow-bg-bottom"></div>
+
+  <header>
+    <div class="header-logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+      </svg>
+      <h1 id="header-device-title">OSPREY CONTROLLER</h1>
+    </div>
+
+    <!-- Main Navigation Tabs -->
+    <nav class="nav-tabs" aria-label="Main Navigation">
+      <button class="nav-tab active" id="tab-btn-controller" onclick="switchTab('controller')">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0m-9.75 0h9.75" />
+        </svg>
+        Web Controller
+      </button>
+      <button class="nav-tab" id="tab-btn-manual" onclick="switchTab('manual')">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+        </svg>
+        User Manual
+      </button>
+    </nav>
+
+    <div class="header-controls">
+      <!-- Save & Sync Option on Header (Starts disabled) -->
+      <button class="btn btn-primary" id="btn-write" disabled
+        style="padding: 6px 14px; font-size: 0.85rem; height: 36px; display: flex; align-items: center; gap: 6px;">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        Save & Sync
+      </button>
+
+      <!-- Reboot Device Option on Header -->
+      <button class="btn btn-secondary" id="btn-reboot-header" disabled
+        style="padding: 6px 14px; font-size: 0.85rem; height: 36px; display: none; align-items: center; gap: 6px; border-color: #eab308; color: #eab308;">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+        Reboot Device
+      </button>
+
+      <!-- Disconnect Option on Header -->
+      <button class="btn btn-disconnect" id="btn-disconnect-header"
+        style="padding: 6px 14px; font-size: 0.85rem; height: 36px; display: flex; align-items: center; gap: 6px;">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Disconnect
+      </button>
+
+      <!-- Theme Switcher -->
+      <button class="btn-theme-toggle" id="theme-toggle" aria-label="Toggle Theme">
+        <svg id="theme-icon" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+          stroke-width="2.5">
+          <!-- moon shape default -->
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+        </svg>
+      </button>
+
+      <div class="status-badge" id="status-badge">
+        <span class="status-dot"></span>
+        <span class="status-text" id="status-text">Disconnected</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Login/Connect Card Overlay with Built-in Web Firmware Flasher -->
+  <div class="login-container" id="login-card">
+    <div class="login-card" style="max-width: 500px; padding: 2rem;">
+      <div class="login-icon">
+        <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+        </svg>
+      </div>
+      <h2 class="login-title">Osprey Controller Manager</h2>
+      <p class="login-subtitle" style="margin-bottom: 1.5rem;">Connect your ESP32 board over USB to configure settings, or flash the latest firmware directly from your browser.</p>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
+        <!-- Option 1: Web Serial Manager Connect -->
+        <button class="btn btn-primary" id="btn-login-connect"
+          style="justify-content: center; width: 100%; padding: 13px; font-size: 0.95rem; font-weight: 600;">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          Connect &amp; Configure Controller
+        </button>
+
+        <!-- Divider -->
+        <div style="display: flex; align-items: center; gap: 10px; margin: 0.25rem 0;">
+          <div style="flex: 1; height: 1px; background: var(--card-border);"></div>
+          <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Or Install Fresh Firmware</span>
+          <div style="flex: 1; height: 1px; background: var(--card-border);"></div>
+        </div>
+
+        <!-- Option 2: Direct In-Browser Firmware Flasher -->
+        <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 1rem; text-align: center;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <div style="text-align: left;">
+              <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-main);">ESP32 Firmware (SH110X)</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">1.3" OLED • 8-CH Sequencer • v1.0.0</div>
+            </div>
+            <span style="background: rgba(0, 122, 138, 0.15); color: var(--teal); font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">READY</span>
+          </div>
+
+          <esp-web-install-button id="initial-esp-installer-btn" manifest="manifest.json">
+            <button slot="activate" class="btn btn-secondary" onclick="prepareFlasherDisconnect()"
+              style="width: 100%; justify-content: center; padding: 10px; font-size: 0.88rem; font-weight: 600; border-color: var(--teal); color: var(--teal);">
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+              </svg>
+              ⚡ Flash / Install Firmware Now
+            </button>
+            <span slot="unsupported" style="color: var(--error); font-size: 0.8rem; display: block; margin-top: 6px;">Web Serial Flashing requires Chrome, Edge, or Opera on Desktop.</span>
+          </esp-web-install-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Container -->
+  <div class="main-container" id="dashboard-container">
+
+    <!-- Card 1: Branding & Channels -->
+    <div class="card">
+      <h2 class="card-title">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.43l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        Device Branding & Channels
+      </h2>
+
+      <div class="form-group">
+        <label for="bootText">CONTROLLER NAME (BOOT TEXT)</label>
+        <input type="text" id="bootText" placeholder="OSPREY CONTROLLER" maxlength="32">
+      </div>
+
+      <div class="form-group">
+        <label for="bootFont">BOOT TEXT FONT STYLE & SIZE</label>
+        <select id="bootFont" class="form-select">
+          <option value="0">Compact Small (8px Bold) [Default]</option>
+          <option value="1">Medium (10px Bold)</option>
+          <option value="2">Monospace (10px Classic)</option>
+          <option value="3">Profont (12px Retro)</option>
+          <option value="4">Large (14px Bold)</option>
+          <option value="5">Extra Large (18px Bold)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>CHANNEL LABELS (MAX 12 CHARS)</label>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ch1">CHANNEL 1</label>
+            <input type="text" id="ch1" placeholder="CH 1" maxlength="12">
+          </div>
+          <div class="form-group">
+            <label for="ch2">CHANNEL 2</label>
+            <input type="text" id="ch2" placeholder="CH 2" maxlength="12">
+          </div>
+        </div>
+        <div class="form-row" style="margin-top: 0.75rem;">
+          <div class="form-group">
+            <label for="ch3">CHANNEL 3</label>
+            <input type="text" id="ch3" placeholder="CH 3" maxlength="12">
+          </div>
+          <div class="form-group">
+            <label for="ch4">CHANNEL 4</label>
+            <input type="text" id="ch4" placeholder="CH 4" maxlength="12">
+          </div>
+        </div>
+        <div class="form-row" style="margin-top: 0.75rem;">
+          <div class="form-group">
+            <label for="ch5">CHANNEL 5</label>
+            <input type="text" id="ch5" placeholder="CH 5" maxlength="12">
+          </div>
+          <div class="form-group">
+            <label for="ch6">CHANNEL 6</label>
+            <input type="text" id="ch6" placeholder="CH 6" maxlength="12">
+          </div>
+        </div>
+        <div class="form-row" style="margin-top: 0.75rem;">
+          <div class="form-group">
+            <label for="ch7">CHANNEL 7</label>
+            <input type="text" id="ch7" placeholder="CH 7" maxlength="12">
+          </div>
+          <div class="form-group">
+            <label for="ch8">CHANNEL 8</label>
+            <input type="text" id="ch8" placeholder="CH 8" maxlength="12">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Layout, Fonts & Timers -->
+    <div class="card">
+      <h2 class="card-title">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-3.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+        </svg>
+        Layout & System Settings
+      </h2>
+
+      <div class="form-group">
+        <label>MENU LAYOUT STYLE</label>
+        <div class="style-selector">
+          <div class="style-option">
+            <input type="radio" name="menuStyle" id="styleHorizontal" value="0">
+            <label class="style-label" for="styleHorizontal">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+              Horizontal Flipper
+            </label>
+          </div>
+          <div class="style-option">
+            <input type="radio" name="menuStyle" id="styleVertical" value="1" checked>
+            <label class="style-label" for="styleVertical">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+              </svg>
+              Vertical Carousel
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="menuFont">DEVICE FONT FAMILY</label>
+        <select id="menuFont" class="form-select">
+          <option value="0">Helvetica (Modern Bold)</option>
+          <option value="1">Monospace (Classic Text)</option>
+          <option value="2">Profont (Retro High-Tech)</option>
+        </select>
+      </div>
+
+      <div class="range-container">
+        <div class="range-header">
+          <label for="autoInterval">AUTO RUNTIME DURATION</label>
+          <span class="range-value" id="autoIntervalVal">120s (2m)</span>
+        </div>
+        <input type="range" id="autoInterval" min="10" max="600" step="10" value="120">
+      </div>
+
+      <div class="range-container">
+        <div class="range-header">
+          <label for="longPress">MODE ACTIVATION DELAY</label>
+          <span class="range-value" id="longPressVal">1.0s</span>
+        </div>
+        <input type="range" id="longPress" min="500" max="5000" step="100" value="1000">
+      </div>
+
+      <div class="range-container">
+        <div class="range-header">
+          <label for="screensaverDelay">SCREENSAVER TIMEOUT DELAY</label>
+          <span class="range-value" id="screensaverDelayVal">10 Min</span>
+        </div>
+        <input type="range" id="screensaverDelay" min="1" max="60" step="1" value="10">
+      </div>
+
+      <!-- Emergency Trigger Actions Box -->
+      <div style="margin-top: 1.25rem; padding: 1.15rem; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px;">
+        <div style="font-weight: 700; font-size: 0.88rem; display: flex; align-items: center; gap: 8px; margin-bottom: 0.85rem; color: var(--text-main);">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="color: var(--error);">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          EMERGENCY BUTTON &mdash; INSTANT TRIGGER ACTIONS
+        </div>
+        <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-bottom: 0.85rem;">
+          Select target mode/relays activated instantly when the button is pressed. Controller switches instantly and stays in the selected mode.
+        </small>
+
+        <div class="form-group" style="margin-bottom: 0.7rem;">
+          <label for="dashboard-emg-mode" style="font-weight: 600; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 0.04em;">
+            TRIGGER ACTION 1
+          </label>
+          <select id="dashboard-emg-mode" class="form-select" style="font-size: 0.9rem;">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="dashboard-emg-mode2" style="font-weight: 600; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 0.04em;">
+            TRIGGER ACTION 2 <span style="color: var(--text-muted); font-weight: 400;">(optional &mdash; combines with Action 1)</span>
+          </label>
+          <select id="dashboard-emg-mode2" class="form-select" style="font-size: 0.9rem;">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Menu Option Rearrangement & Options Editor -->
+    <div class="card" style="grid-column: span 2;">
+      <h2 class="card-title">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
+        </svg>
+        Configure & Rearrange Menu Options
+      </h2>
+      <label>REARRANGE OPTIONS OR DELETE UNNECESSARY ONES (STANDBY OFF REMAINS LOCKED AT INDEX 1)</label>
+
+      <div class="reorder-list" id="reorder-list">
+        <!-- Will be populated dynamically by script -->
+      </div>
+
+      <!-- Add Unused Options Container -->
+      <div class="add-option-container" id="add-option-container"
+        style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--card-border); display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <label for="add-mode-select" style="white-space: nowrap; margin-bottom: 0;">ADD MODE:</label>
+        <select id="add-mode-select" class="form-select" style="max-width: 250px;">
+          <!-- Populated dynamically -->
+        </select>
+        <button class="btn btn-primary" id="btn-add-option"
+          style="padding: 8px 16px; font-size: 0.9rem; height: 38px;">+ Add Option</button>
+      </div>
+    </div>
+
+    <!-- Card 4: Custom Chaser Effects Editor -->
+    <div class="card" style="grid-column: span 2;">
+      <h2 class="card-title">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+        </svg>
+        Custom Chaser Effects Configuration
+      </h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Configure the active relay channels, execution sequence, and step speed for each of the 5 custom chaser effects. Add them in the Display list above to run them.</p>
+
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- Effect 1 -->
+        <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.25rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            <div class="form-group" style="margin:0;">
+              <label for="effName1">EFFECT 1 NAME</label>
+              <input type="text" id="effName1" placeholder="EFFECT 1" value="EFFECT 1" maxlength="16">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="effSeq1">CHANNEL SEQUENCE (E.G. 1,2,3,4,5,6,7,8)</label>
+              <input type="text" id="effSeq1" placeholder="1,2,3,4" value="1,2,3,4">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="effTime1">STEP INTERVAL (MS)</label>
+              <input type="number" id="effTime1" placeholder="500" value="500" min="50" max="10000" step="50">
+            </div>
+            <div class="form-group" style="margin:0; display: flex; align-items: center; gap: 10px;">
+              <input type="checkbox" id="effLoop1" checked style="width: auto; margin: 0; cursor: pointer;">
+              <label for="effLoop1" style="margin: 0; cursor: pointer; font-weight: bold; font-size: 0.85rem;">LOOP INFINITELY</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Effect 2 -->
+        <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.25rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            <div class="form-group" style="margin:0;">
+              <label for="effName2">EFFECT 2 NAME</label>
+              <input type="text" id="effName2" placeholder="EFFECT 2" value="EFFECT 2" maxlength="16">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="effSeq2">CHANNEL SEQUENCE</label>
+              <input type="text" id="effSeq2" placeholder="5,6,7,8" value="5,6,7,8">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="effTime2">STEP INTERVAL (MS)</label>
+              <input type="number" id="effTime2" placeholder="500" value="500" min="50" max="10000" step="50">
+            </div>
+            <div class="form-group" style="margin:0; display: flex; align-items: center; gap: 10px;">
+              <input type="checkbox" id="effLoop2" checked style="width: auto; margin: 0; cursor: pointer;">
+              <label for="effLoop2" style="margin: 0; cursor: pointer; font-weight: bold; font-size: 0.85rem;">LOOP INFINITELY</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Effect 3 -->
+        <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.25rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            <div class="form-group" style="margin:0;">
+              <label for="effName3">EFFECT 3 NAME</label>
+              <input type="text" id="effName3" placeholder="EFFECT 3" value="EFFECT 3" maxlength="16">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="effSeq3">CHANNEL SEQUENCE</label>
+              <input type="text" id="effSeq3" placeholder="1,3,5,7" value="1,3,5,7">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="effTime3">STEP INTERVAL (MS)</label>
+              <input type="number" id="effTime3" placeholder="500" value="500" min="50" max="10000" step="50">
+            </div>
+            <div class="form-group" style="margin:0; display: flex; align-items: center; gap: 10px;">
+              <input type="checkbox" id="effLoop3" checked style="width: auto; margin: 0; cursor: pointer;">
+              <label for="effLoop3" style="margin: 0; cursor: pointer; font-weight: bold; font-size: 0.85rem;">LOOP INFINITELY</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Effect 4 -->
+        <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.25rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            <div class="form-group" style="margin:0;">
+              <label for="effName4">EFFECT 4 NAME</label>
+              <input type="text" id="effName4" placeholder="EFFECT 4" value="EFFECT 4" maxlength="16">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="effSeq4">CHANNEL SEQUENCE</label>
+              <input type="text" id="effSeq4" placeholder="2,4,6,8" value="2,4,6,8">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="effTime4">STEP INTERVAL (MS)</label>
+              <input type="number" id="effTime4" placeholder="500" value="500" min="50" max="10000" step="50">
+            </div>
+            <div class="form-group" style="margin:0; display: flex; align-items: center; gap: 10px;">
+              <input type="checkbox" id="effLoop4" checked style="width: auto; margin: 0; cursor: pointer;">
+              <label for="effLoop4" style="margin: 0; cursor: pointer; font-weight: bold; font-size: 0.85rem;">LOOP INFINITELY</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Effect 5 -->
+        <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.25rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            <div class="form-group" style="margin:0;">
+              <label for="effName5">EFFECT 5 NAME</label>
+              <input type="text" id="effName5" placeholder="EFFECT 5" value="EFFECT 5" maxlength="16">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="effSeq5">CHANNEL SEQUENCE</label>
+              <input type="text" id="effSeq5" placeholder="1,2,3,4,5,6,7,8" value="1,2,3,4,5,6,7,8">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="effTime5">STEP INTERVAL (MS)</label>
+              <input type="number" id="effTime5" placeholder="500" value="500" min="50" max="10000" step="50">
+            </div>
+            <div class="form-group" style="margin:0; display: flex; align-items: center; gap: 10px;">
+              <input type="checkbox" id="effLoop5" checked style="width: auto; margin: 0; cursor: pointer;">
+              <label for="effLoop5" style="margin: 0; cursor: pointer; font-weight: bold; font-size: 0.85rem;">LOOP INFINITELY</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3B: Power Sequencer & Audio Groups (Kerala Bus Audio Anti-Pop Delay System) -->
+    <div class="card" style="grid-column: span 2;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem;">
+        <h2 class="card-title" style="margin-bottom: 0;">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Power Sequencer & Equipment Groups (Kerala Bus Audio Anti-Pop)
+        </h2>
+        <button class="btn btn-secondary" onclick="loadKeralaBusPreset()" style="padding: 6px 14px; font-size: 0.82rem; height: 34px; border-color: var(--accent); color: var(--accent); font-weight: 600;">
+          ⚡ Load Kerala Bus DSP Preset
+        </button>
+      </div>
+
+      <div style="padding: 10px 14px; background: rgba(0, 122, 138, 0.06); border: 1px solid var(--teal-glow); border-radius: 8px; font-size: 0.84rem; margin-bottom: 1.25rem; line-height: 1.45;">
+        <strong>🛡️ Audio Pop Protection / FIFO Safe Shutdown:</strong> When multiple heavy audio components (DSP, Amps, Inverters, TV) switch simultaneously, high-voltage surges produce loud speaker pops. Configure <strong>Entry Delay (ON)</strong> so amplifiers & DSPs wake up softly, and <strong>Exit Delay (OFF)</strong> so sensitive processors power down safely before the master inverter cuts.
+      </div>
+
+      <!-- Per-Relay Delay Table -->
+      <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+        1. Per-Relay Delay Timers & Transition Toggles
+      </h3>
+
+      <div style="overflow-x: auto; margin-bottom: 1.75rem;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.86rem; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--card-border); color: var(--text-muted);">
+              <th style="padding: 8px 12px;">CHANNEL</th>
+              <th style="padding: 8px 12px;">ENTRY DELAY (ON)</th>
+              <th style="padding: 8px 12px;">ENTRY ACTIVE</th>
+              <th style="padding: 8px 12px;">EXIT DELAY (OFF)</th>
+              <th style="padding: 8px 12px;">EXIT ACTIVE</th>
+            </tr>
+          </thead>
+          <tbody id="sequencer-table-body">
+            <!-- Populated via JS for Channels 1 to 8 -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Power Groups Editor (Modes 25–29) -->
+      <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+        2. Power Groups (Preset Modes 25–29 with Sequencer Delays)
+      </h3>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem;" id="power-groups-container">
+        <!-- Power Groups 1 to 5 dynamically configured in HTML -->
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="button-group">
+      <button class="btn btn-secondary" id="btn-read">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+        </svg>
+        Read Config
+      </button>
+      <button class="btn btn-secondary" id="btn-defaults">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3m-3-3v12" />
+        </svg>
+        Reset Defaults
+      </button>
+    </div>
+
+    <!-- Card 4: Console Log -->
+    <div class="card console-card">
+      <h2 class="card-title">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+        </svg>
+        Live Serial Terminal Log
+      </h2>
+      <div class="console-log" id="console-log">Initializing Console... Available Web Serial port will show transactions
+        here.</div>
+    </div>
+
+  </div>
+
+  <!-- User Manual Container (Tab 2) -->
+  <div class="manual-container" id="manual-container">
+
+    <!-- Section 1: Quick Operator & Navigation Guide -->
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <h2 class="card-title" style="color: var(--teal);">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="24" height="24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+        </svg>
+        Rotary Encoder Operations & Quick Guide
+      </h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.25rem;">
+        Quick reference guide for operating the Osprey Controller using its tactile Rotary Encoder dial and
+        high-contrast OLED display.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+        <!-- Control 1 -->
+        <div
+          style="padding: 1rem; background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px;">
+          <div
+            style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--accent); margin-bottom: 6px;">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Rotate Knob (Clockwise / Counter-CW)
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.4;">
+            Scrolls smoothly through menus and modes with animated carousel transitions on the OLED screen.
+          </p>
+        </div>
+
+        <!-- Control 2 -->
+        <div
+          style="padding: 1rem; background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px;">
+          <div
+            style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--teal); margin-bottom: 6px;">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+            </svg>
+            Encoder Push Button (Short Press)
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.4;">
+            Activates highlighted mode or toggles the selected channel relay <strong>ON</strong> / <strong>OFF</strong> in manual mode.
+          </p>
+        </div>
+
+        <!-- Control 3 -->
+        <div
+          style="padding: 1rem; background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px;">
+          <div
+            style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--error); margin-bottom: 6px;">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+            Encoder Push Button (Long Press)
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.4;">
+            Triggers <strong>STANDBY (All OFF)</strong> from active modes, or switches to <strong>ALL CHANNELS ON</strong> when already in Standby.
+          </p>
+        </div>
+      </div>
+
+      <div
+        style="margin-top: 1rem; padding: 12px; background: rgba(0, 122, 138, 0.05); border: 1px solid var(--teal-glow); border-radius: 8px; font-size: 0.85rem; line-height: 1.5;">
+        <strong style="color: var(--teal);">💡 Visual OLED Status &amp; Safety Delays:</strong>
+        <ul style="margin-left: 1.25rem; margin-top: 4px;">
+          <li><strong>White BG + Black Text:</strong> Manual channel relay is ACTIVE (ON).</li>
+          <li><strong>Black BG + White Text:</strong> Manual channel relay is INACTIVE (OFF).</li>
+          <li><strong>Sequential Delays:</strong> Anti-pop delay protection sequences equipment automatically upon mode or group activation.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Section 2: Web Controller & Navigation Settings Guide -->
+    <div class="card">
+      <h2 class="card-title">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="24" height="24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0m-9.75 0h9.75" />
+        </svg>
+        Web Controller &amp; Navigation Settings
+      </h2>
+
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.25rem;">
+        How to configure device navigation, screen layouts, channel labels, fonts, screensaver, and persistent NVS memory options via Web Serial.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <!-- Sub-tile 1: Navigation & Layout Settings -->
+        <div
+          style="padding: 12px 16px; background: rgba(255, 107, 61, 0.05); border: 1px solid var(--accent-glow); border-radius: 8px; font-size: 0.85rem; line-height: 1.5;">
+          <strong style="color: var(--accent); font-size: 0.92rem;">⚙️ Navigation &amp; Layout Settings:</strong>
+          <ul style="margin-left: 1.25rem; margin-top: 4px; color: var(--text-main);">
+            <li><strong>Menu Layout Style:</strong> Switch between <em>Horizontal Flipper</em> (centered mode card with left/right arrows) and <em>Vertical Carousel</em> (3-mode vertical selection).</li>
+            <li><strong>Device Font Family:</strong> Choose the OLED screen navigation font: Helvetica (modern bold), Monospace (classic), or Profont (retro).</li>
+            <li><strong>Long Press Threshold:</strong> Adjust how long to hold the dial to trigger Standby All OFF / All ON.</li>
+            <li><strong>Auto Duration:</strong> Set how long auto-cycle modes run before stopping.</li>
+            <li><strong>Screensaver Timeout:</strong> Set the inactivity time before the logo screensaver appears. Screensaver is automatically suppressed while any relay is active.</li>
+          </ul>
+        </div>
+
+        <!-- Sub-tile 2: Branding, Boot Text & Channel Labels -->
+        <div
+          style="padding: 12px 16px; background: rgba(0, 122, 138, 0.05); border: 1px solid var(--teal-glow); border-radius: 8px; font-size: 0.85rem; line-height: 1.5;">
+          <strong style="color: var(--teal); font-size: 0.92rem;">🏷️ Branding, Boot Text &amp; Channel Labels:</strong>
+          <ul style="margin-left: 1.25rem; margin-top: 4px; color: var(--text-main);">
+            <li><strong>Controller Boot Text:</strong> Customize the startup text displayed on the OLED screen when the device powers on.</li>
+            <li><strong>Boot Text Font Style &amp; Size:</strong> Choose how large the boot text appears — from compact (small) up to extra large.</li>
+            <li><strong>Channel Labels:</strong> Rename Relay Channels 1–8 with descriptive names (e.g. TV, DSP, SUB AMP, VOCALS).</li>
+            <li><strong>Menu Option Rearrangement:</strong> Use UP/DOWN arrows to reorder modes or remove unnecessary ones. Restore removed modes anytime via the "+ Add Option" dropdown.</li>
+            <li><strong>Save &amp; Sync:</strong> Click <em>Save &amp; Sync</em> in the header to store your settings on the device.</li>
+          </ul>
+        </div>
+
+        <!-- Sub-tile 3: Relay Channel Wiring -->
+        <div
+          style="padding: 12px 16px; background: rgba(34, 197, 94, 0.05); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 8px; font-size: 0.85rem; line-height: 1.5;">
+          <strong style="color: var(--success); font-size: 0.92rem;">⚡ Relay Channel Wiring:</strong>
+          <ul style="margin-left: 1.25rem; margin-top: 4px; color: var(--text-main);">
+            <li>The controller has <strong>8 independent relay channels</strong> (CH 1–8) for switching AC or DC electrical loads.</li>
+            <li>Each channel uses <strong>Common (COM)</strong> and <strong>Normally Open (NO)</strong> screw terminals.</li>
+            <li>Connect the Live/Positive wire of your load through the relay contacts. Neutral/Ground bypass the controller directly.</li>
+            <li>Always disconnect line power before connecting or adjusting wiring.</li>
+          </ul>
+        </div>
+
+        <!-- Sub-tile 4: Admin Settings -->
+        <div
+          style="padding: 12px 16px; background: rgba(234, 179, 8, 0.05); border: 1px solid rgba(234, 179, 8, 0.25); border-radius: 8px; font-size: 0.85rem; line-height: 1.5;">
+          <strong style="color: #eab308; font-size: 0.92rem;">🔐 Admin Settings:</strong>
+          <p style="margin-left: 0.25rem; margin-top: 4px; color: var(--text-main);">
+            Advanced hardware configuration is available via the <strong>Admin Settings</strong> button in the footer.
+            This section is intended for authorized personnel and requires an administrator password.
+            Contact your system administrator or authorized installer for access.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Admin Settings Button at Footer -->
+  <footer>
+    <p>Osprey Controller Web Manager • Built via Web Serial API</p>
+    <div style="margin-top: 10px;">
+      <button class="btn btn-secondary" id="btn-admin-trigger" onclick="openAdminAuthModal()"
+        style="font-size: 0.8rem; padding: 6px 14px; border-color: var(--accent); color: var(--accent); display: inline-flex; align-items: center; gap: 6px;">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+        </svg>
+        Admin Settings
+      </button>
+    </div>
+  </footer>
+
+  <!-- Modal 1: Admin Password Authentication -->
+  <div id="admin-auth-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(6px); z-index:999; align-items:center; justify-content:center;">
+    <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:2rem; width:90%; max-width:400px; box-shadow:0 12px 35px rgba(0,0,0,0.4); text-align:center;">
+      <h3 style="color:var(--text-main); margin-bottom:0.5rem; display:flex; align-items:center; justify-content:center; gap:8px; font-size:1.15rem;">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        Admin Password Required
+      </h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.4;">Enter administrator password stored in microcontroller NVS flash to unlock settings.</p>
+      <input type="password" id="admin-pass-input" placeholder="Enter Admin Password" onkeydown="if(event.key==='Enter') unlockAdminPanel()" style="width:100%; padding:11px; border-radius:10px; border:1px solid var(--card-border); background:var(--bg); color:var(--text-main); margin-bottom:1rem; text-align:center; font-size:1.05rem; outline:none; font-weight:bold;">
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-secondary" style="flex:1;" onclick="closeAdminAuthModal()">Cancel</button>
+        <button class="btn btn-primary" style="flex:1; font-weight:bold;" onclick="unlockAdminPanel()">Unlock ↵</button>
+      </div>
+      <div id="admin-auth-error" style="color:var(--error); font-size:0.82rem; margin-top:10px; display:none; font-weight:bold;">Invalid admin password.</div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Hidden Admin Settings & Flasher Panel -->
+  <div id="admin-panel-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); z-index:1000; align-items:center; justify-content:center; padding:1.5rem; overflow-y:auto;">
+    <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:2rem; width:100%; max-width:720px; box-shadow:0 12px 40px rgba(0,0,0,0.4); margin:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; border-bottom:1px solid var(--card-border); padding-bottom:1rem;">
+        <h2 style="color:var(--text-main); font-size:1.2rem; display:flex; align-items:center; gap:10px; margin:0;">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0m-9.75 0h9.75" />
+          </svg>
+          Admin Control Panel & Web Serial Flasher
+        </h2>
+        <button class="btn btn-secondary" onclick="closeAdminPanel()" style="padding:4px 12px; font-size:0.85rem;">✕ Close</button>
+      </div>
+
+      <!-- Admin Navigation Tabs -->
+      <div style="display:flex; gap:10px; margin-bottom:1.5rem; border-bottom:1px solid var(--card-border); padding-bottom:10px;">
+        <button class="btn btn-secondary active" id="admin-tab-pins" onclick="switchAdminTab('pins')" style="font-size:0.88rem; padding:8px 16px;">🔌 Hardware Pins & Security</button>
+        <button class="btn btn-secondary" id="admin-tab-firmware" onclick="switchAdminTab('firmware')" style="font-size:0.88rem; padding:8px 16px;">⚡ Web Firmware Flasher</button>
+      </div>
+
+      <!-- Admin Tab 1: Hardware Pin Mapping & Password Security -->
+      <div id="admin-section-pins">
+        <!-- Section A: Relay Hardware Output Channels -->
+        <div style="background:var(--btn-sec-bg); border:1px solid var(--card-border); border-radius:12px; padding:1.25rem; margin-bottom:1.25rem;">
+          <div style="font-size:0.85rem; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#22c55e;"></span>
+            Relay Output Channels (GPIO 0 - 32)
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:1rem;">
+            <div class="form-group" style="margin:0; text-align:center;">
+              <label for="admin-pin-ch1" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:700;">RELAY CH 1</label>
+              <input type="number" id="admin-pin-ch1" class="form-input" value="23" min="0" max="39" style="text-align:center; font-weight:bold; font-size:1.15rem; padding:8px;">
+            </div>
+            <div class="form-group" style="margin:0; text-align:center;">
+              <label for="admin-pin-ch2" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:700;">RELAY CH 2</label>
+              <input type="number" id="admin-pin-ch2" class="form-input" value="22" min="0" max="39" style="text-align:center; font-weight:bold; font-size:1.15rem; padding:8px;">
+            </div>
+            <div class="form-group" style="margin:0; text-align:center;">
+              <label for="admin-pin-ch3" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:700;">RELAY CH 3</label>
+              <input type="number" id="admin-pin-ch3" class="form-input" value="21" min="0" max="39" style="text-align:center; font-weight:bold; font-size:1.15rem; padding:8px;">
+            </div>
+            <div class="form-group" style="margin:0; text-align:center;">
+              <label for="admin-pin-ch4" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:700;">RELAY CH 4</label>
+              <input type="number" id="admin-pin-ch4" class="form-input" value="19" min="0" max="39" style="text-align:center; font-weight:bold; font-size:1.15rem; padding:8px;">
+            </div>
+            <div class="form-group" style="margin:0; text-align:center;">
+              <label for="admin-pin-ch5" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:700;">RELAY CH 5</label>
+              <input type="number" id="admin-pin-ch5" class="form-input" value="13" min="0" max="39" style="text-align:center; font-weight:bold; font-size:1.15rem; padding:8px;">
+            </div>
+            <div class="form-group" style="margin:0; text-align:center;">
+              <label for="admin-pin-ch6" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:700;">RELAY CH 6</label>
+              <input type="number" id="admin-pin-ch6" class="form-input" value="12" min="0" max="39" style="text-align:center; font-weight:bold; font-size:1.15rem; padding:8px;">
+            </div>
+            <div class="form-group" style="margin:0; text-align:center;">
+              <label for="admin-pin-ch7" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:700;">RELAY CH 7</label>
+              <input type="number" id="admin-pin-ch7" class="form-input" value="32" min="0" max="39" style="text-align:center; font-weight:bold; font-size:1.15rem; padding:8px;">
+            </div>
+            <div class="form-group" style="margin:0; text-align:center;">
+              <label for="admin-pin-ch8" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:700;">RELAY CH 8</label>
+              <input type="number" id="admin-pin-ch8" class="form-input" value="33" min="0" max="39" style="text-align:center; font-weight:bold; font-size:1.15rem; padding:8px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section B: Peripherals, Rotary Encoder & Emergency Mode -->
+        <div style="background:var(--btn-sec-bg); border:1px solid var(--card-border); border-radius:12px; padding:1.25rem; margin-bottom:1.25rem;">
+          <div style="font-size:0.85rem; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#3b82f6;"></span>
+            Peripherals, Rotary Encoder & Emergency Mode
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:1rem; margin-bottom:1rem;">
+            <div class="form-group" style="margin:0; text-align:center;">
+              <label for="admin-pin-clk" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:700;">ENCODER CLK</label>
+              <input type="number" id="admin-pin-clk" class="form-input" value="26" min="0" max="39" style="text-align:center; font-weight:bold; font-size:1.15rem; padding:8px;">
+            </div>
+            <div class="form-group" style="margin:0; text-align:center;">
+              <label for="admin-pin-dt" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:700;">ENCODER DT</label>
+              <input type="number" id="admin-pin-dt" class="form-input" value="27" min="0" max="39" style="text-align:center; font-weight:bold; font-size:1.15rem; padding:8px;">
+            </div>
+            <div class="form-group" style="margin:0; text-align:center;">
+              <label for="admin-pin-sw" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:700;">ENCODER SW</label>
+              <input type="number" id="admin-pin-sw" class="form-input" value="25" min="0" max="39" style="text-align:center; font-weight:bold; font-size:1.15rem; padding:8px;">
+            </div>
+            <div class="form-group" style="margin:0; text-align:center;">
+              <label for="admin-pin-emg" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:700;">EMERGENCY PIN</label>
+              <input type="number" id="admin-pin-emg" class="form-input" value="4" min="0" max="39" style="text-align:center; font-weight:bold; font-size:1.15rem; padding:8px;">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:1rem; margin-bottom:1rem;">
+            <div class="form-group" style="margin:0; text-align:center;">
+              <label for="admin-pin-sda" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:700;">OLED SDA (I2C)</label>
+              <input type="number" id="admin-pin-sda" class="form-input" value="18" min="0" max="39" style="text-align:center; font-weight:bold; font-size:1.15rem; padding:8px;">
+            </div>
+            <div class="form-group" style="margin:0; text-align:center;">
+              <label for="admin-pin-scl" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:700;">OLED SCL (I2C)</label>
+              <input type="number" id="admin-pin-scl" class="form-input" value="5" min="0" max="39" style="text-align:center; font-weight:bold; font-size:1.15rem; padding:8px;">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div class="form-group" style="margin:0;">
+              <label for="admin-display-type" style="font-size:0.75rem; color:var(--text-muted); font-weight:700; display:block; margin-bottom:6px;">OLED DISPLAY CONTROLLER TYPE</label>
+              <select id="admin-display-type" class="form-select" style="font-size:0.95rem; font-weight:bold;">
+                <option value="0">SH1106 (1.3" OLED Driver)</option>
+                <option value="1">SSD1306 (0.96" OLED Driver)</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="admin-emg-mode" style="font-size:0.75rem; color:var(--text-muted); font-weight:700; display:block; margin-bottom:6px;">🚨 EMERGENCY BUTTON ASSIGNED MODE</label>
+              <select id="admin-emg-mode" class="form-select" style="font-size:0.95rem; font-weight:bold;">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section C: Admin Security & Password Change -->
+        <div style="background:var(--btn-sec-bg); border:1px solid var(--card-border); border-radius:12px; padding:1.25rem; margin-bottom:1.25rem;">
+          <div style="font-size:0.85rem; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#eab308;"></span>
+            🔑 Admin Security Password (Stored in Microcontroller NVS)
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div class="form-group" style="margin:0;">
+              <label for="admin-new-pass" style="font-size:0.75rem;">NEW ADMIN PASSWORD</label>
+              <input type="password" id="admin-new-pass" class="form-input" placeholder="Leave empty to keep current" style="font-size:0.95rem;">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="admin-confirm-pass" style="font-size:0.75rem;">CONFIRM NEW PASSWORD</label>
+              <input type="password" id="admin-confirm-pass" class="form-input" placeholder="Re-type new password" style="font-size:0.95rem;">
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:flex-end; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-secondary" onclick="readAdminPins()">🔄 Read Current Device NVS</button>
+          <button class="btn btn-primary" onclick="saveAdminPins()" style="padding:10px 20px; font-weight:bold;">💾 Save Settings to Microcontroller NVS</button>
+        </div>
+      </div>
+
+      <!-- Admin Tab 2: ESP Web Serial Firmware Flasher -->
+      <div id="admin-section-firmware" style="display:none; text-align:center; padding:1.5rem 1rem;">
+        <h3 style="font-size:1.1rem; color:var(--text-main); margin-bottom:0.5rem;">Firmware Update</h3>
+        <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.5rem;">Update your Osprey Controller firmware directly over Web Serial.</p>
+        
+        <esp-web-install-button id="esp-installer-btn" manifest="firmware/manifest.json">
+          <button slot="activate" class="btn btn-primary" onclick="prepareFlasherDisconnect()" style="margin:auto; display:inline-flex; align-items:center; gap:8px; padding:12px 24px; font-size:0.95rem;">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+            Install Firmware
+          </button>
+          <span slot="unsupported" style="color:var(--error); font-size:0.85rem;">Web Serial API is not supported in this browser. Use Chrome, Edge, or Opera on Desktop.</span>
+        </esp-web-install-button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- GLOBAL STATE & CONFIGURATION ---
+    let port = null;
+    let reader = null;
+    let inputBuffer = "";
+    let keepReading = true;
+    let readLoopPromise = null;
+    let deviceAdminPass = "";
+
+    // Core modes definition (indexes 0 to 29)
+    const rawModes = {
+      0: "Standby OFF",
+      1: "Auto CH 1",
+      2: "Auto CH 2",
+      3: "Auto CH 3",
+      4: "Auto CH 4",
+      5: "Auto CH 5",
+      6: "Auto CH 6",
+      7: "Auto CH 7",
+      8: "Auto CH 8",
+      9: "Auto ALL ON",
+      10: "All CH X Min Each",
+      11: "Manual CH 1",
+      12: "Manual CH 2",
+      13: "Manual CH 3",
+      14: "Manual CH 4",
+      15: "Manual CH 5",
+      16: "Manual CH 6",
+      17: "Manual CH 7",
+      18: "Manual CH 8",
+      19: "Manual ALL ON",
+      20: "Custom Effect 1",
+      21: "Custom Effect 2",
+      22: "Custom Effect 3",
+      23: "Custom Effect 4",
+      24: "Custom Effect 5",
+      25: "Power Group 1",
+      26: "Power Group 2",
+      27: "Power Group 3",
+      28: "Power Group 4",
+      29: "Power Group 5"
+    };
+
+    // Active order representation (starts with default 25 modes)
+    let currentOrder = Array.from({length: 25}, (_, i) => i);
+
+    // --- THEME SWITCHER IMPLEMENTATION ---
+    const themeToggleBtn = document.getElementById("theme-toggle");
+    const themeIcon = document.getElementById("theme-icon");
+
+    const moonPath = `<path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />`;
+    const sunPath = `<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 13.5V21M6.75 6.75l1.582 1.582m8.336 8.336l1.582 1.582M3 12h2.25m13.5 0H21M6.75 17.25l1.582-1.582m8.336-8.336l1.582-1.582M12 7.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9z" />`;
+
+    themeToggleBtn.addEventListener("click", () => {
+      document.body.classList.toggle("dark-theme");
+      const isDark = document.body.classList.contains("dark-theme");
+      themeIcon.innerHTML = isDark ? sunPath : moonPath;
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+      logMessage(`Theme switched to ${isDark ? 'Dark' : 'Light'} Mode.`, "sys");
+    });
+
+    // Load saved theme preference
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      document.body.classList.add("dark-theme");
+      themeIcon.innerHTML = sunPath;
+    } else {
+      themeIcon.innerHTML = moonPath;
+    }
+
+    // --- HELPER FUNCTIONS ---
+    function logMessage(text, type = "sys") {
+      const consoleLog = document.getElementById("console-log");
+      if (!consoleLog) return;
+      const timestamp = new Date().toLocaleTimeString();
+      const span = document.createElement("span");
+      span.className = `log-${type}`;
+      span.textContent = `[${timestamp}] ${text}\n`;
+      consoleLog.appendChild(span);
+      consoleLog.scrollTop = consoleLog.scrollHeight;
+    }
+
+    // --- TAB SWITCHING MANAGEMENT ---
+    let currentTab = 'controller';
+
+    function switchTab(tabName) {
+      currentTab = tabName;
+      const btnController = document.getElementById("tab-btn-controller");
+      const btnManual = document.getElementById("tab-btn-manual");
+      const manualContainer = document.getElementById("manual-container");
+      const loginCard = document.getElementById("login-card");
+      const dashboard = document.getElementById("dashboard-container");
+
+      if (tabName === 'manual') {
+        btnController.classList.remove("active");
+        btnManual.classList.add("active");
+        loginCard.style.display = "none";
+        dashboard.style.display = "none";
+        manualContainer.style.display = "block";
+      } else {
+        btnManual.classList.remove("active");
+        btnController.classList.add("active");
+        manualContainer.style.display = "none";
+
+        const isConnected = port !== null && port.readable;
+        if (isConnected) {
+          loginCard.style.display = "none";
+          dashboard.style.display = "grid";
+        } else {
+          loginCard.style.display = "flex";
+          dashboard.style.display = "none";
+        }
+      }
+    }
+
+    // Update connection UI and Header options
+    function updateConnectionUI(connected) {
+      const loginCard = document.getElementById("login-card");
+      const dashboard = document.getElementById("dashboard-container");
+      const manualContainer = document.getElementById("manual-container");
+      const btnDisconnect = document.getElementById("btn-disconnect-header");
+      const btnReboot = document.getElementById("btn-reboot-header");
+      const btnWrite = document.getElementById("btn-write");
+      const badge = document.getElementById("status-badge");
+      const badgeText = document.getElementById("status-text");
+
+      if (connected) {
+        btnDisconnect.style.display = "flex";
+        if (btnReboot) {
+          btnReboot.style.display = "flex";
+          btnReboot.disabled = false;
+        }
+        btnWrite.disabled = false;
+        badge.classList.add("connected");
+        badgeText.textContent = "Connected";
+
+        if (currentTab === 'controller') {
+          loginCard.style.display = "none";
+          dashboard.style.display = "grid";
+          manualContainer.style.display = "none";
+        } else {
+          loginCard.style.display = "none";
+          dashboard.style.display = "none";
+          manualContainer.style.display = "block";
+        }
+      } else {
+        btnDisconnect.style.display = "none";
+        if (btnReboot) {
+          btnReboot.style.display = "none";
+          btnReboot.disabled = true;
+        }
+        btnWrite.disabled = true;
+        const titleEl = document.getElementById("header-device-title");
+        if (titleEl) titleEl.innerText = "OSPREY CONTROLLER";
+        badge.classList.remove("connected");
+        badgeText.textContent = "Disconnected";
+
+        if (currentTab === 'controller') {
+          loginCard.style.display = "flex";
+          dashboard.style.display = "none";
+          manualContainer.style.display = "none";
+        } else {
+          loginCard.style.display = "none";
+          dashboard.style.display = "none";
+          manualContainer.style.display = "block";
+        }
+      }
+    }
+
+    // Populate or update the visual rearrangement list
+    function renderOrderList() {
+      const listEl = document.getElementById("reorder-list");
+      if (!listEl) return;
+      listEl.innerHTML = "";
+
+      const minsVal = Math.floor(parseInt(document.getElementById("autoInterval").value) / 60) || 2;
+
+      currentOrder.forEach((modeIdx, position) => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = `reorder-item${modeIdx === 0 ? " locked" : ""}`;
+
+        let label = rawModes[modeIdx];
+        if (modeIdx >= 1 && modeIdx <= 8) {
+          const chVal = document.getElementById(`ch${modeIdx}`).value || `CH ${modeIdx}`;
+          label = `Auto (${chVal})`;
+        } else if (modeIdx === 9) {
+          label = `Auto ALL ON`;
+        } else if (modeIdx === 10) {
+          label = `All CH ${minsVal} Min Each`;
+        } else if (modeIdx >= 11 && modeIdx <= 18) {
+          const chVal = document.getElementById(`ch${modeIdx - 10}`).value || `CH ${modeIdx - 10}`;
+          label = `Manual (${chVal})`;
+        } else if (modeIdx === 19) {
+          label = `Manual ALL ON`;
+        } else if (modeIdx >= 20 && modeIdx <= 24) {
+          const effNameEl = document.getElementById(`effName${modeIdx - 19}`);
+          const customEffName = effNameEl ? effNameEl.value.trim() : "";
+          label = customEffName || `Effect ${modeIdx - 19}`;
+        } else if (modeIdx >= 25 && modeIdx <= 29) {
+          const grpNameEl = document.getElementById(`grpName${modeIdx - 24}`);
+          const customGrpName = grpNameEl ? grpNameEl.value.trim() : "";
+          label = customGrpName || `Group ${modeIdx - 24}`;
+        }
+
+        const labelSpan = document.createElement("span");
+        labelSpan.className = "item-label";
+        labelSpan.textContent = `${position + 1}. ${label.toUpperCase()}`;
+
+        const controlDiv = document.createElement("div");
+        controlDiv.className = "item-controls";
+
+        // Up arrow button (cannot move Standby, and cannot move items into position 0)
+        const btnUp = document.createElement("button");
+        btnUp.className = "btn-arrow";
+        btnUp.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>`;
+        btnUp.disabled = (modeIdx === 0 || position <= 1);
+        btnUp.onclick = () => moveItem(position, -1);
+
+        // Down arrow button (cannot move Standby, and cannot move last item down)
+        const btnDown = document.createElement("button");
+        btnDown.className = "btn-arrow";
+        btnDown.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>`;
+        btnDown.disabled = (modeIdx === 0 || position === currentOrder.length - 1);
+        btnDown.onclick = () => moveItem(position, 1);
+
+        controlDiv.appendChild(btnUp);
+        controlDiv.appendChild(btnDown);
+
+        // Delete Option button (cannot delete Standby OFF)
+        if (modeIdx !== 0) {
+          const btnDelete = document.createElement("button");
+          btnDelete.className = "btn-arrow";
+          btnDelete.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>`;
+          btnDelete.style.color = "var(--error)";
+          btnDelete.onclick = () => deleteOption(position);
+          controlDiv.appendChild(btnDelete);
+        }
+
+        itemDiv.appendChild(labelSpan);
+        itemDiv.appendChild(controlDiv);
+        listEl.appendChild(itemDiv);
+      });
+
+      updateAddOptionSelector();
+    }
+
+    function moveItem(index, direction) {
+      const targetIndex = index + direction;
+      if (targetIndex < 1 || targetIndex >= currentOrder.length) return; // index 0 is locked
+
+      const temp = currentOrder[index];
+      currentOrder[index] = currentOrder[targetIndex];
+      currentOrder[targetIndex] = temp;
+
+      renderOrderList();
+    }
+
+    function deleteOption(position) {
+      const removed = currentOrder.splice(position, 1);
+      logMessage(`Removed option: ${rawModes[removed[0]].toUpperCase()}`, "sys");
+      renderOrderList();
+    }
+
+    function updateAddOptionSelector() {
+      const selectEl = document.getElementById("add-mode-select");
+      const container = document.getElementById("add-option-container");
+      if (!selectEl || !container) return;
+
+      selectEl.innerHTML = "";
+
+      // Find all rawModes indices that are NOT in currentOrder
+      const unusedModes = Object.keys(rawModes)
+        .map(Number)
+        .filter(modeIdx => !currentOrder.includes(modeIdx));
+
+      if (unusedModes.length === 0) {
+        container.style.display = "none";
+        return;
+      }
+
+      container.style.display = "flex";
+
+      const minsVal = Math.floor(parseInt(document.getElementById("autoInterval").value) / 60) || 2;
+
+      unusedModes.forEach(modeIdx => {
+        const option = document.createElement("option");
+        option.value = modeIdx;
+
+        let label = rawModes[modeIdx];
+        if (modeIdx >= 1 && modeIdx <= 8) {
+          const chVal = document.getElementById(`ch${modeIdx}`).value || `CH ${modeIdx}`;
+          label = `Auto (${chVal})`;
+        } else if (modeIdx === 9) {
+          label = `Auto ALL ON`;
+        } else if (modeIdx === 10) {
+          label = `All CH ${minsVal} Min Each`;
+        } else if (modeIdx >= 11 && modeIdx <= 18) {
+          const chVal = document.getElementById(`ch${modeIdx - 10}`).value || `CH ${modeIdx - 10}`;
+          label = `Manual (${chVal})`;
+        } else if (modeIdx === 19) {
+          label = `Manual ALL ON`;
+        } else if (modeIdx >= 20 && modeIdx <= 24) {
+          const effNameEl = document.getElementById(`effName${modeIdx - 19}`);
+          const customEffName = effNameEl ? effNameEl.value.trim() : "";
+          label = customEffName || `Effect ${modeIdx - 19}`;
+        } else if (modeIdx >= 25 && modeIdx <= 29) {
+          const grpNameEl = document.getElementById(`grpName${modeIdx - 24}`);
+          const customGrpName = grpNameEl ? grpNameEl.value.trim() : "";
+          label = customGrpName || `Group ${modeIdx - 24}`;
+        }
+
+        option.textContent = label.toUpperCase();
+        selectEl.appendChild(option);
+      });
+    }
+
+    function populateEmergencyModes() {
+      const selects = [
+        document.getElementById("dashboard-emg-mode"),
+        document.getElementById("dashboard-emg-mode2"),
+        document.getElementById("admin-emg-mode")
+      ];
+      selects.forEach(emgSelect => {
+        if (!emgSelect) return;
+        const currentSelVal = emgSelect.value;
+        emgSelect.innerHTML = "";
+        // For Action 2, add a "None / Same as Action 1" option
+        if (emgSelect.id === "dashboard-emg-mode2") {
+          const noneOpt = document.createElement("option");
+          noneOpt.value = "0";
+          noneOpt.textContent = "— None (Same as Action 1) —";
+          emgSelect.appendChild(noneOpt);
+        }
+        Object.keys(rawModes).forEach(modeIdx => {
+          // Skip mode 0 (standby) for the Action 2 list since None already covers it
+          if (emgSelect.id === "dashboard-emg-mode2" && parseInt(modeIdx) === 0) return;
+          const opt = document.createElement("option");
+          opt.value = modeIdx;
+          let label = rawModes[modeIdx];
+          if (modeIdx >= 1 && modeIdx <= 8) {
+            const chVal = document.getElementById(`ch${modeIdx}`).value || `CH ${modeIdx}`;
+            label = `Auto (${chVal})`;
+          } else if (modeIdx >= 11 && modeIdx <= 18) {
+            const chVal = document.getElementById(`ch${modeIdx - 10}`).value || `CH ${modeIdx - 10}`;
+            label = `Manual (${chVal})`;
+          } else if (modeIdx >= 20 && modeIdx <= 24) {
+            const effNameEl = document.getElementById(`effName${modeIdx - 19}`);
+            const customEffName = effNameEl ? effNameEl.value.trim() : "";
+            label = customEffName || `Effect ${modeIdx - 19}`;
+          } else if (modeIdx >= 25 && modeIdx <= 29) {
+            const grpNameEl = document.getElementById(`grpName${modeIdx - 24}`);
+            const customGrpName = grpNameEl ? grpNameEl.value.trim() : "";
+            label = customGrpName || `Group ${modeIdx - 24}`;
+          }
+          opt.textContent = `${modeIdx === 0 ? "MODE 0: " : `MODE ${modeIdx}: `}${label.toUpperCase()}`;
+          emgSelect.appendChild(opt);
+        });
+        if (currentSelVal) emgSelect.value = currentSelVal;
+      });
+    }
+
+    // Add selected option back to menu
+    document.getElementById("btn-add-option").onclick = () => {
+      const selectEl = document.getElementById("add-mode-select");
+      if (!selectEl) return;
+      const selectedMode = parseInt(selectEl.value);
+      if (!isNaN(selectedMode)) {
+        currentOrder.push(selectedMode);
+        logMessage(`Added option: ${rawModes[selectedMode].toUpperCase()}`, "sys");
+        renderOrderList();
+      }
+    };
+
+    // --- RANGE VALUE SYNC ---
+    document.getElementById("autoInterval").addEventListener("input", (e) => {
+      const val = parseInt(e.target.value);
+      const mins = Math.floor(val / 60);
+      const secs = val % 60;
+      let label = `${val}s`;
+      if (mins > 0) {
+        label += ` (${mins}m${secs > 0 ? ` ${secs}s` : ''})`;
+      }
+      document.getElementById("autoIntervalVal").textContent = label;
+      renderOrderList(); // Update the minute duration in sequential name
+    });
+
+    document.getElementById("longPress").addEventListener("input", (e) => {
+      const val = (parseInt(e.target.value) / 1000).toFixed(1);
+      document.getElementById("longPressVal").textContent = `${val}s`;
+    });
+
+    // --- SEQUENCER & POWER GROUPS UI GENERATION ---
+    function initSequencerUI() {
+      // 1. Generate Per-Relay Delay Table Rows
+      const tableBody = document.getElementById("sequencer-table-body");
+      if (tableBody) {
+        tableBody.innerHTML = "";
+        for (let i = 1; i <= 8; i++) {
+          const tr = document.createElement("tr");
+          tr.style.borderBottom = "1px solid var(--card-border)";
+          
+          const chNameVal = (document.getElementById(`ch${i}`) ? document.getElementById(`ch${i}`).value : "") || `CH ${i}`;
+
+          tr.innerHTML = `
+            <td style="padding: 10px 12px; font-weight: 600;">
+              <span id="seq-ch-label-${i}" style="color: var(--accent);">${chNameVal.toUpperCase()}</span>
+            </td>
+            <td style="padding: 10px 12px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <input type="number" id="rlyEntry${i}" value="0" min="0" max="30000" step="100" style="width: 90px; padding: 6px 10px; font-size: 0.84rem;">
+                <span style="font-size: 0.78rem; color: var(--text-muted);">ms</span>
+              </div>
+            </td>
+            <td style="padding: 10px 12px;">
+              <label class="switch" style="transform: scale(0.85); transform-origin: left center;">
+                <input type="checkbox" id="rlyEntOn${i}">
+                <span class="slider"></span>
+              </label>
+            </td>
+            <td style="padding: 10px 12px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <input type="number" id="rlyExit${i}" value="0" min="0" max="30000" step="100" style="width: 90px; padding: 6px 10px; font-size: 0.84rem;">
+                <span style="font-size: 0.78rem; color: var(--text-muted);">ms</span>
+              </div>
+            </td>
+            <td style="padding: 10px 12px;">
+              <label class="switch" style="transform: scale(0.85); transform-origin: left center;">
+                <input type="checkbox" id="rlyExtOn${i}">
+                <span class="slider"></span>
+              </label>
+            </td>
+          `;
+          tableBody.appendChild(tr);
+        }
+      }
+
+      // 2. Generate Power Groups Cards (Modes 25–29)
+      const groupsContainer = document.getElementById("power-groups-container");
+      if (groupsContainer) {
+        groupsContainer.innerHTML = "";
+        for (let i = 1; i <= 5; i++) {
+          const grpCard = document.createElement("div");
+          grpCard.style.cssText = "background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.2rem;";
+          
+          let chCheckboxes = "";
+          for (let ch = 1; ch <= 8; ch++) {
+            const chName = (document.getElementById(`ch${ch}`) ? document.getElementById(`ch${ch}`).value : "") || `CH ${ch}`;
+            chCheckboxes += `
+              <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 500; cursor: pointer; background: var(--card-bg); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--card-border);">
+                <input type="checkbox" id="grp${i}_ch${ch}" style="cursor: pointer;">
+                <span id="grp${i}_ch${ch}_label">${chName.toUpperCase()}</span>
+              </label>
+            `;
+          }
+
+          grpCard.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 0.75rem;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 0.85rem; font-weight: 700; color: var(--teal); background: rgba(0,122,138,0.12); padding: 2px 8px; border-radius: 6px;">MODE ${24 + i}</span>
+                <input type="text" id="grpName${i}" placeholder="GROUP ${i}" value="GROUP ${i}" maxlength="16" style="padding: 6px 12px; font-size: 0.88rem; width: 180px;">
+              </div>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Applies individual relay delays automatically</span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              ${chCheckboxes}
+            </div>
+          `;
+          groupsContainer.appendChild(grpCard);
+
+          // Add listener to group name input to re-render dropdowns
+          const grpInput = grpCard.querySelector(`#grpName${i}`);
+          if (grpInput) {
+            grpInput.addEventListener("input", () => {
+              renderOrderList();
+              populateEmergencyModes();
+            });
+          }
+        }
+      }
+    }
+
+    function updateSequencerChannelLabels() {
+      for (let i = 1; i <= 8; i++) {
+        const val = (document.getElementById(`ch${i}`) ? document.getElementById(`ch${i}`).value : "") || `CH ${i}`;
+        const lbl = document.getElementById(`seq-ch-label-${i}`);
+        if (lbl) lbl.textContent = val.toUpperCase();
+        for (let g = 1; g <= 5; g++) {
+          const gLbl = document.getElementById(`grp${g}_ch${i}_label`);
+          if (gLbl) gLbl.textContent = val.toUpperCase();
+        }
+      }
+    }
+
+    // Preset for Kerala Bus Sound System (Varma's / AS Plus high-output setup)
+    function loadKeralaBusPreset() {
+      if (!confirm("Load recommended Kerala Bus Audio preset delays and equipment groups?\n\nThis will configure anti-pop startup delays (DSP 3000ms delay, Inverter/TV instant, Amps 4000ms) and FIFO shutdown timers.")) return;
+
+      // 1. Channel Names
+      const names = ["TV", "INVERTER", "MIXER", "CROSSOVER", "DSP", "SUB AMP", "MAIN AMP", "SPARE"];
+      for (let i = 1; i <= 8; i++) {
+        const el = document.getElementById(`ch${i}`);
+        if (el) el.value = names[i - 1];
+      }
+
+      // 2. Delays & Toggles (Anti-Pop Tuning)
+      // CH1 (TV): Entry 0ms (OFF), Exit 3000ms (ON)
+      document.getElementById("rlyEntry1").value = 0;
+      document.getElementById("rlyEntOn1").checked = false;
+      document.getElementById("rlyExit1").value = 3000;
+      document.getElementById("rlyExtOn1").checked = true;
+
+      // CH2 (Inverter): Entry 0ms (OFF), Exit 3000ms (ON)
+      document.getElementById("rlyEntry2").value = 0;
+      document.getElementById("rlyEntOn2").checked = false;
+      document.getElementById("rlyExit2").value = 3000;
+      document.getElementById("rlyExtOn2").checked = true;
+
+      // CH3 (Mixer): Entry 500ms (ON), Exit 2000ms (ON)
+      document.getElementById("rlyEntry3").value = 500;
+      document.getElementById("rlyEntOn3").checked = true;
+      document.getElementById("rlyExit3").value = 2000;
+      document.getElementById("rlyExtOn3").checked = true;
+
+      // CH4 (Crossover): Entry 500ms (ON), Exit 2000ms (ON)
+      document.getElementById("rlyEntry4").value = 500;
+      document.getElementById("rlyEntOn4").checked = true;
+      document.getElementById("rlyExit4").value = 2000;
+      document.getElementById("rlyExtOn4").checked = true;
+
+      // CH5 (DSP): Entry 3000ms (ON) [Avoids startup crack], Exit 0ms (OFF) [First to cut!]
+      document.getElementById("rlyEntry5").value = 3000;
+      document.getElementById("rlyEntOn5").checked = true;
+      document.getElementById("rlyExit5").value = 0;
+      document.getElementById("rlyExtOn5").checked = false;
+
+      // CH6 (Sub Amp): Entry 4000ms (ON) [Powers on after DSP is stable], Exit 500ms (ON)
+      document.getElementById("rlyEntry6").value = 4000;
+      document.getElementById("rlyEntOn6").checked = true;
+      document.getElementById("rlyExit6").value = 500;
+      document.getElementById("rlyExtOn6").checked = true;
+
+      // CH7 (Main Amp): Entry 4000ms (ON), Exit 500ms (ON)
+      document.getElementById("rlyEntry7").value = 4000;
+      document.getElementById("rlyEntOn7").checked = true;
+      document.getElementById("rlyExit7").value = 500;
+      document.getElementById("rlyExtOn7").checked = true;
+
+      // CH8 (Spare): Entry 0ms, Exit 0ms
+      document.getElementById("rlyEntry8").value = 0;
+      document.getElementById("rlyEntOn8").checked = false;
+      document.getElementById("rlyExit8").value = 0;
+      document.getElementById("rlyExtOn8").checked = false;
+
+      // 3. Power Groups
+      document.getElementById("grpName1").value = "FULL AUDIO";
+      [1,2,3,4,5,6,7].forEach(ch => { document.getElementById(`grp1_ch${ch}`).checked = true; });
+
+      document.getElementById("grpName2").value = "DSP & AMPS";
+      [1,2,5,6,7].forEach(ch => { document.getElementById(`grp2_ch${ch}`).checked = true; });
+
+      document.getElementById("grpName3").value = "TV & MIXER";
+      [1,2,3].forEach(ch => { document.getElementById(`grp3_ch${ch}`).checked = true; });
+
+      document.getElementById("grpName4").value = "VOCALS ONLY";
+      [1,2,3,4,7].forEach(ch => { document.getElementById(`grp4_ch${ch}`).checked = true; });
+
+      document.getElementById("grpName5").value = "SUBWOOFER ONLY";
+      [1,2,3,4,6].forEach(ch => { document.getElementById(`grp5_ch${ch}`).checked = true; });
+
+      updateSequencerChannelLabels();
+      renderOrderList();
+      populateEmergencyModes();
+      logMessage("Kerala Bus Audio Preset loaded with anti-pop DSP delay parameters.", "sys");
+    }
+
+    // Sync labels dynamically
+    const fields = ["ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7", "ch8"];
+    fields.forEach(fId => {
+      document.getElementById(fId).addEventListener("input", () => {
+        updateSequencerChannelLabels();
+        renderOrderList();
+        populateEmergencyModes();
+      });
+    });
+
+    for (let i = 1; i <= 5; i++) {
+      const el = document.getElementById(`effName${i}`);
+      if (el) {
+        el.addEventListener("input", () => {
+          renderOrderList();
+          populateEmergencyModes();
+        });
+      }
+    }
+
+    const dashEmg = document.getElementById("dashboard-emg-mode");
+    const adminEmg = document.getElementById("admin-emg-mode");
+    if (dashEmg) {
+      dashEmg.addEventListener("change", (e) => {
+        if (adminEmg) adminEmg.value = e.target.value;
+      });
+    }
+    if (adminEmg) {
+      adminEmg.addEventListener("change", (e) => {
+        if (dashEmg) dashEmg.value = e.target.value;
+      });
+    }
+    // Initialize UI tables and list
+    initSequencerUI();
+    renderOrderList();
+
+    function getSerialApi() {
+      if ('serial' in navigator && navigator.serial) {
+        return navigator.serial;
+      }
+      return null;
+    }
+
+    async function connectSerial() {
+      const serialApi = getSerialApi();
+
+      if (!serialApi) {
+        logMessage("Connection failed: Web Serial API is not supported by your browser. Please use Desktop Google Chrome, Microsoft Edge, or Opera.", "err");
+        alert("Web Serial API is not supported by your browser.\n\nPlease open this manager on a compatible desktop browser such as Google Chrome, Microsoft Edge, or Opera.");
+        return;
+      }
+
+      try {
+        const filters = [
+          { usbVendorId: 0x303a, vendorId: 0x303a }, // Espressif ESP32-C3 / S3
+          { usbVendorId: 0x10c4, vendorId: 0x10c4 }, // CP2102
+          { usbVendorId: 0x1a86, vendorId: 0x1a86 }, // CH340
+          { usbVendorId: 0x0403, vendorId: 0x0403 }, // FTDI
+          { usbVendorId: 0x2341, vendorId: 0x2341 }  // Arduino
+        ];
+
+        logMessage("Prompting for USB serial device connection...", "sys");
+
+        try {
+          port = await serialApi.requestPort({ filters });
+        } catch (filterErr) {
+          if (filterErr.name === 'NotFoundError' || (filterErr.message && filterErr.message.includes('No device selected'))) {
+            throw filterErr;
+          }
+          port = await serialApi.requestPort();
+        }
+
+        await port.open({ baudRate: 115200 });
+
+        updateConnectionUI(true);
+        logMessage("Serial Connection established successfully!", "sys");
+
+        readLoopPromise = readSerialStream();
+        setTimeout(readConfig, 1000);
+      } catch (err) {
+        logMessage(`Connection failed: ${err.message}`, "err");
+        alert(`Connection failed: ${err.message}`);
+      }
+    }
+
+
+    async function disconnectSerial() {
+      keepReading = false;
+      try {
+        if (reader) {
+          await reader.cancel();
+        }
+        if (readLoopPromise) {
+          await readLoopPromise;
+          readLoopPromise = null;
+        }
+        if (port) {
+          await port.close();
+        }
+      } catch (err) {
+        logMessage(`Disconnect error: ${err.message}`, "err");
+      }
+
+      port = null;
+      reader = null;
+      deviceAdminPass = "";
+      updateConnectionUI(false);
+
+      logMessage("Serial Connection closed.", "sys");
+    }
+
+
+    async function readSerialStream() {
+      const textDecoder = new TextDecoder();
+      keepReading = true;
+      while (port && port.readable && keepReading) {
+        try {
+          reader = port.readable.getReader();
+          while (keepReading) {
+            const { value, done } = await reader.read();
+            if (done) break;
+
+            const chunk = textDecoder.decode(value);
+            inputBuffer += chunk;
+
+            // Check for newlines
+            let newlineIdx;
+            while ((newlineIdx = inputBuffer.indexOf("\n")) !== -1) {
+              const line = inputBuffer.substring(0, newlineIdx).trim();
+              inputBuffer = inputBuffer.substring(newlineIdx + 1);
+              if (line) {
+                logMessage(`RX: ${line}`, "rx");
+                parseIncomingLine(line);
+              }
+            }
+          }
+        } catch (err) {
+          if (keepReading) {
+            logMessage(`Reader error: ${err.message}`, "err");
+          }
+          break;
+        } finally {
+          if (reader) {
+            reader.releaseLock();
+            reader = null;
+          }
+        }
+      }
+    }
+
+    async function writeSerial(data) {
+      if (!port || !port.writable) {
+        logMessage("Cannot send: Serial not writable.", "err");
+        return;
+      }
+      logMessage(`TX: ${data}`, "tx");
+      const encoder = new TextEncoder();
+      const writer = port.writable.getWriter();
+      await writer.write(encoder.encode(data + "\n"));
+      writer.releaseLock();
+    }
+
+    // Listen for wired disconnect (device pulled out)
+    if ('serial' in navigator && navigator.serial && navigator.serial.addEventListener) {
+      navigator.serial.addEventListener("disconnect", (event) => {
+        if (port && event.target === port) {
+          logMessage("Wired USB connection broken. Logging out...", "err");
+          disconnectSerial();
+        }
+      });
+    }
+
+
+
+
+    // --- PACKET PARSING LOGIC ---
+    function parseIncomingLine(line) {
+      if (line.startsWith("CFG:")) {
+        const jsonStr = line.substring(4);
+        try {
+          const cfg = JSON.parse(jsonStr);
+
+          // Set Boot Text / Controller Name
+          if (cfg.bootText) {
+            document.getElementById("bootText").value = cfg.bootText;
+            const titleEl = document.getElementById("header-device-title");
+            if (titleEl) titleEl.innerText = cfg.bootText.toUpperCase();
+          }
+
+          // Set Admin Pass if present
+          if (cfg.adminPass && cfg.adminPass.trim() !== "") {
+            deviceAdminPass = cfg.adminPass.trim();
+          }
+          document.getElementById("ch1").value = cfg.ch1;
+          document.getElementById("ch2").value = cfg.ch2;
+          document.getElementById("ch3").value = cfg.ch3;
+          document.getElementById("ch4").value = cfg.ch4;
+          document.getElementById("ch5").value = cfg.ch5;
+          document.getElementById("ch6").value = cfg.ch6;
+          document.getElementById("ch7").value = cfg.ch7;
+          document.getElementById("ch8").value = cfg.ch8;
+
+          // Set Style radio
+          const styleRadios = document.getElementsByName("menuStyle");
+          for (const radio of styleRadios) {
+            if (parseInt(radio.value) === cfg.menuStyle) {
+              radio.checked = true;
+              break;
+            }
+          }
+
+          // Set Font dropdown
+          if (cfg.menuFont !== undefined) {
+            document.getElementById("menuFont").value = cfg.menuFont;
+          }
+
+          // Set Boot Font dropdown
+          if (cfg.bootFont !== undefined) {
+            document.getElementById("bootFont").value = cfg.bootFont;
+          }
+
+          // Set Display Type dropdown
+          if (cfg.displayType !== undefined) {
+            document.getElementById("admin-display-type").value = cfg.displayType;
+          }
+
+          // Set Interval slider
+          const secInterval = Math.floor(cfg.autoInterval / 1000);
+          document.getElementById("autoInterval").value = secInterval;
+          document.getElementById("autoInterval").dispatchEvent(new Event("input"));
+
+          // Set Longpress slider
+          document.getElementById("longPress").value = cfg.longPress;
+          document.getElementById("longPress").dispatchEvent(new Event("input"));
+
+          // Set Screensaver Delay slider
+          if (cfg.screensaverDelay !== undefined) {
+            const ssMins = Math.round(cfg.screensaverDelay / 60000) || 10;
+            document.getElementById("screensaverDelay").value = ssMins;
+            document.getElementById("screensaverDelayVal").innerText = `${ssMins} Min`;
+          }
+
+          // Set 5 Custom Effects fields
+          for (let i = 1; i <= 5; i++) {
+            if (cfg[`effName${i}`] !== undefined) {
+              document.getElementById(`effName${i}`).value = cfg[`effName${i}`];
+            }
+            if (cfg[`effSeq${i}`] !== undefined) {
+              document.getElementById(`effSeq${i}`).value = cfg[`effSeq${i}`];
+            }
+            if (cfg[`effTime${i}`] !== undefined) {
+              document.getElementById(`effTime${i}`).value = cfg[`effTime${i}`];
+            }
+            if (cfg[`effLoop${i}`] !== undefined) {
+              document.getElementById(`effLoop${i}`).checked = (cfg[`effLoop${i}`] === 1);
+            }
+          }
+
+          // Set 8 Per-Relay Power Sequencer Delays
+          for (let i = 1; i <= 8; i++) {
+            if (cfg[`rlyEntry${i}`] !== undefined) {
+              const el = document.getElementById(`rlyEntry${i}`);
+              if (el) el.value = cfg[`rlyEntry${i}`];
+            }
+            if (cfg[`rlyExit${i}`] !== undefined) {
+              const el = document.getElementById(`rlyExit${i}`);
+              if (el) el.value = cfg[`rlyExit${i}`];
+            }
+            if (cfg[`rlyEntOn${i}`] !== undefined) {
+              const el = document.getElementById(`rlyEntOn${i}`);
+              if (el) el.checked = (cfg[`rlyEntOn${i}`] === 1);
+            }
+            if (cfg[`rlyExtOn${i}`] !== undefined) {
+              const el = document.getElementById(`rlyExtOn${i}`);
+              if (el) el.checked = (cfg[`rlyExtOn${i}`] === 1);
+            }
+          }
+
+          // Set 5 Power Groups
+          for (let i = 1; i <= 5; i++) {
+            if (cfg[`grpName${i}`] !== undefined) {
+              const el = document.getElementById(`grpName${i}`);
+              if (el) el.value = cfg[`grpName${i}`];
+            }
+            if (cfg[`grpSeq${i}`] !== undefined) {
+              const seqStr = cfg[`grpSeq${i}`] || "";
+              const activeChs = seqStr.split(",").map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+              for (let ch = 1; ch <= 8; ch++) {
+                const chBox = document.getElementById(`grp${i}_ch${ch}`);
+                if (chBox) chBox.checked = activeChs.includes(ch);
+              }
+            }
+          }
+
+          // Set order
+          if (Array.isArray(cfg.order) && cfg.order.length > 0) {
+            currentOrder = cfg.order;
+          }
+
+          populateEmergencyModes();
+
+          if (cfg.emgMode !== undefined) {
+            if (document.getElementById("dashboard-emg-mode")) document.getElementById("dashboard-emg-mode").value = cfg.emgMode;
+            if (document.getElementById("admin-emg-mode")) document.getElementById("admin-emg-mode").value = cfg.emgMode;
+          }
+          if (cfg.emgMode2 !== undefined) {
+            if (document.getElementById("dashboard-emg-mode2")) document.getElementById("dashboard-emg-mode2").value = cfg.emgMode2;
+          }
+
+          renderOrderList();
+          logMessage("Configuration read successfully.", "sys");
+        } catch (err) {
+          logMessage(`Failed to parse JSON configuration: ${err.message}`, "err");
+        }
+      } else if (line.startsWith("PINS:")) {
+        try {
+          const pins = JSON.parse(line.substring(5));
+          if (pins.adminPass) deviceAdminPass = pins.adminPass;
+          if (pins.ch1 !== undefined) document.getElementById("admin-pin-ch1").value = pins.ch1;
+          if (pins.ch2 !== undefined) document.getElementById("admin-pin-ch2").value = pins.ch2;
+          if (pins.ch3 !== undefined) document.getElementById("admin-pin-ch3").value = pins.ch3;
+          if (pins.ch4 !== undefined) document.getElementById("admin-pin-ch4").value = pins.ch4;
+          if (pins.ch5 !== undefined) document.getElementById("admin-pin-ch5").value = pins.ch5;
+          if (pins.ch6 !== undefined) document.getElementById("admin-pin-ch6").value = pins.ch6;
+          if (pins.ch7 !== undefined) document.getElementById("admin-pin-ch7").value = pins.ch7;
+          if (pins.ch8 !== undefined) document.getElementById("admin-pin-ch8").value = pins.ch8;
+          if (pins.clk !== undefined) document.getElementById("admin-pin-clk").value = pins.clk;
+          if (pins.dt !== undefined) document.getElementById("admin-pin-dt").value = pins.dt;
+          if (pins.sw !== undefined) document.getElementById("admin-pin-sw").value = pins.sw;
+          if (pins.emg !== undefined) document.getElementById("admin-pin-emg").value = pins.emg;
+          if (pins.sda !== undefined) document.getElementById("admin-pin-sda").value = pins.sda;
+          if (pins.scl !== undefined) document.getElementById("admin-pin-scl").value = pins.scl;
+          if (pins.dispType !== undefined) document.getElementById("admin-display-type").value = pins.dispType;
+          populateEmergencyModes();
+          if (pins.emgMode !== undefined) {
+            if (document.getElementById("dashboard-emg-mode")) document.getElementById("dashboard-emg-mode").value = pins.emgMode;
+            if (document.getElementById("admin-emg-mode")) document.getElementById("admin-emg-mode").value = pins.emgMode;
+          }
+          logMessage("Hardware pins configuration read successfully.", "sys");
+        } catch (err) {
+          logMessage(`Failed to parse PINS json: ${err.message}`, "err");
+        }
+      } else if (line.includes("SET_PINS_OK")) {
+        logMessage("Hardware GPIO pin & admin security configurations saved to device NVS flash successfully!", "sys");
+        alert("Hardware GPIO Pin & Admin security configurations saved to microcontroller NVS memory partition!");
+      } else if (line.includes("SET_OK")) {
+        logMessage("Configuration saved and synced successfully!", "sys");
+        alert("Settings synced and saved successfully!");
+      } else if (line.includes("REBOOT_OK")) {
+        logMessage("Reboot command acknowledged. Device is restarting...", "sys");
+      } else if (line.includes("RESET_OK")) {
+        logMessage("Factory reset completed successfully. Device is rebooting...", "sys");
+        alert("Factory reset completed successfully! The controller will now reboot. Please log in again.");
+        disconnectSerial();
+      } else if (line.includes("ERR_UNAUTHORIZED")) {
+        logMessage("Action rejected: Admin authorization failed. Please enter the correct password in the Admin Settings panel to save changes.", "err");
+        alert("Action rejected: Unauthorized! Please open the Admin Settings panel in the footer and enter the correct password to authorize saving.");
+      }
+    }
+
+    // --- ADMIN PANEL FUNCTIONS ---
+    function openAdminAuthModal() {
+      if (!port) {
+        alert("Device Not Connected! Please connect your Osprey Controller via Web Serial first to access Admin Settings.");
+        logMessage("Admin Settings access blocked: Device is not connected via Web Serial.", "err");
+        return;
+      }
+      // If legacy firmware / no admin password configured in NVS, open admin & flasher panel directly
+      if (!deviceAdminPass || deviceAdminPass.trim() === "") {
+        logMessage("No admin password set in device NVS. Opening Admin Panel directly...", "sys");
+        document.getElementById("admin-panel-modal").style.display = "flex";
+        readAdminPins();
+        return;
+      }
+      document.getElementById("admin-pass-input").value = "";
+      document.getElementById("admin-auth-error").style.display = "none";
+      document.getElementById("admin-auth-modal").style.display = "flex";
+      setTimeout(() => document.getElementById("admin-pass-input").focus(), 100);
+    }
+
+    function closeAdminAuthModal() {
+      document.getElementById("admin-auth-modal").style.display = "none";
+    }
+
+    function unlockAdminPanel() {
+      if (!port) {
+        alert("Device connection lost. Please connect via Web Serial first.");
+        closeAdminAuthModal();
+        return;
+      }
+      const pass = document.getElementById("admin-pass-input").value.trim();
+      const targetPass = (deviceAdminPass && deviceAdminPass.trim() !== "") ? deviceAdminPass.trim() : "delbin11";
+
+      if (pass === targetPass) {
+        closeAdminAuthModal();
+        document.getElementById("admin-panel-modal").style.display = "flex";
+        readAdminPins();
+      } else {
+        document.getElementById("admin-auth-error").style.display = "block";
+      }
+    }
+
+    function closeAdminPanel() {
+      document.getElementById("admin-panel-modal").style.display = "none";
+    }
+
+    function switchAdminTab(tabName) {
+      if (tabName === 'pins') {
+        document.getElementById("admin-section-pins").style.display = "block";
+        document.getElementById("admin-section-firmware").style.display = "none";
+        document.getElementById("admin-tab-pins").classList.add("active");
+        document.getElementById("admin-tab-firmware").classList.remove("active");
+      } else {
+        document.getElementById("admin-section-pins").style.display = "none";
+        document.getElementById("admin-section-firmware").style.display = "block";
+        document.getElementById("admin-tab-pins").classList.remove("active");
+        document.getElementById("admin-tab-firmware").classList.add("active");
+      }
+    }
+
+    async function prepareFlasherDisconnect() {
+      if (port) {
+        logMessage("Releasing Web Serial connection for ESP Web Tools flasher...", "sys");
+        await disconnectSerial();
+      }
+    }
+
+    function readAdminPins() {
+      if (port) writeSerial("GET_PINS");
+    }
+
+    function saveAdminPins() {
+      if (!port) {
+        alert("Device Not Connected! Please connect via Web Serial to save hardware pin configurations.");
+        return;
+      }
+      const ch1 = document.getElementById("admin-pin-ch1").value;
+      const ch2 = document.getElementById("admin-pin-ch2").value;
+      const ch3 = document.getElementById("admin-pin-ch3").value;
+      const ch4 = document.getElementById("admin-pin-ch4").value;
+      const ch5 = document.getElementById("admin-pin-ch5").value;
+      const ch6 = document.getElementById("admin-pin-ch6").value;
+      const ch7 = document.getElementById("admin-pin-ch7").value;
+      const ch8 = document.getElementById("admin-pin-ch8").value;
+      const clk = document.getElementById("admin-pin-clk").value;
+      const dt = document.getElementById("admin-pin-dt").value;
+      const sw = document.getElementById("admin-pin-sw").value;
+      const emg = document.getElementById("admin-pin-emg").value;
+      const sda = document.getElementById("admin-pin-sda").value;
+      const scl = document.getElementById("admin-pin-scl").value;
+      const dispType = document.getElementById("admin-display-type").value;
+      const emgMode = document.getElementById("admin-emg-mode").value;
+
+      const newPass = document.getElementById("admin-new-pass").value.trim();
+      const confirmPass = document.getElementById("admin-confirm-pass").value.trim();
+
+      let passParam = "";
+      if (newPass !== "") {
+        if (newPass !== confirmPass) {
+          alert("New passwords do not match! Please check and try again.");
+          return;
+        }
+        deviceAdminPass = newPass;
+        passParam = `;adminPass=${newPass}`;
+      }
+
+      const packet = `SET_PINS;ch1=${ch1};ch2=${ch2};ch3=${ch3};ch4=${ch4};ch5=${ch5};ch6=${ch6};ch7=${ch7};ch8=${ch8};clk=${clk};dt=${dt};sw=${sw};emg=${emg};sda=${sda};scl=${scl};dispType=${dispType};emgMode=${emgMode}${passParam};pass=${deviceAdminPass}`;
+      writeSerial(packet);
+    }
+
+    // --- BUTTON CONTROLS ---
+    document.getElementById("btn-login-connect").onclick = connectSerial;
+    document.getElementById("btn-disconnect-header").onclick = disconnectSerial;
+
+    function readConfig() {
+      if (port) {
+        writeSerial("GET_CFG");
+        writeSerial("GET_PINS");
+      }
+    }
+
+    document.getElementById("btn-read").onclick = readConfig;
+
+    document.getElementById("autoInterval").oninput = (e) => {
+      document.getElementById("autoIntervalVal").innerText = `${e.target.value}s (${(e.target.value / 60).toFixed(1)}m)`;
+    };
+
+    document.getElementById("longPress").oninput = (e) => {
+      document.getElementById("longPressVal").innerText = `${(e.target.value / 1000).toFixed(1)}s`;
+    };
+
+    document.getElementById("screensaverDelay").oninput = (e) => {
+      document.getElementById("screensaverDelayVal").innerText = `${e.target.value} Min`;
+    };
+
+    document.getElementById("bootText").addEventListener("input", (e) => {
+      const titleEl = document.getElementById("header-device-title");
+      if (titleEl) {
+        titleEl.innerText = (e.target.value.trim() || "OSPREY CONTROLLER").toUpperCase();
+      }
+    });
+
+    document.getElementById("btn-write").onclick = () => {
+      const bootTextVal = document.getElementById("bootText").value.trim() || "OSPREY CONTROLLER";
+      const ch1Val = document.getElementById("ch1").value.trim() || "CH 1";
+      const ch2Val = document.getElementById("ch2").value.trim() || "CH 2";
+      const ch3Val = document.getElementById("ch3").value.trim() || "CH 3";
+      const ch4Val = document.getElementById("ch4").value.trim() || "CH 4";
+      const ch5Val = document.getElementById("ch5").value.trim() || "CH 5";
+      const ch6Val = document.getElementById("ch6").value.trim() || "CH 6";
+      const ch7Val = document.getElementById("ch7").value.trim() || "CH 7";
+      const ch8Val = document.getElementById("ch8").value.trim() || "CH 8";
+      const styleVal = document.querySelector('input[name="menuStyle"]:checked').value;
+      const fontVal = document.getElementById("menuFont").value;
+      const bootFontVal = document.getElementById("bootFont").value;
+      const dispTypeVal = document.getElementById("admin-display-type").value;
+      const intervalVal = parseInt(document.getElementById("autoInterval").value) * 1000;
+      const longpressVal = parseInt(document.getElementById("longPress").value);
+
+      const ssMins = Math.max(1, parseInt(document.getElementById("screensaverDelay").value) || 10);
+      const ssDelayVal = ssMins * 60000;
+      const orderStr = currentOrder.join(",");
+
+      const effName1 = document.getElementById("effName1").value.trim() || "EFFECT 1";
+      const effName2 = document.getElementById("effName2").value.trim() || "EFFECT 2";
+      const effName3 = document.getElementById("effName3").value.trim() || "EFFECT 3";
+      const effName4 = document.getElementById("effName4").value.trim() || "EFFECT 4";
+      const effName5 = document.getElementById("effName5").value.trim() || "EFFECT 5";
+
+      const effSeq1 = document.getElementById("effSeq1").value.trim() || "1,2,3,4";
+      const effSeq2 = document.getElementById("effSeq2").value.trim() || "5,6,7,8";
+      const effSeq3 = document.getElementById("effSeq3").value.trim() || "1,3,5,7";
+      const effSeq4 = document.getElementById("effSeq4").value.trim() || "2,4,6,8";
+      const effSeq5 = document.getElementById("effSeq5").value.trim() || "1,2,3,4,5,6,7,8";
+      
+      const effTime1 = parseInt(document.getElementById("effTime1").value) || 500;
+      const effTime2 = parseInt(document.getElementById("effTime2").value) || 500;
+      const effTime3 = parseInt(document.getElementById("effTime3").value) || 500;
+      const effTime4 = parseInt(document.getElementById("effTime4").value) || 500;
+      const effTime5 = parseInt(document.getElementById("effTime5").value) || 500;
+      
+      const effLoop1 = document.getElementById("effLoop1").checked ? 1 : 0;
+      const effLoop2 = document.getElementById("effLoop2").checked ? 1 : 0;
+      const effLoop3 = document.getElementById("effLoop3").checked ? 1 : 0;
+      const effLoop4 = document.getElementById("effLoop4").checked ? 1 : 0;
+      const effLoop5 = document.getElementById("effLoop5").checked ? 1 : 0;
+
+      // Power Sequencer Delays & Toggles
+      let seqParams = "";
+      for (let i = 1; i <= 8; i++) {
+        const entVal = parseInt(document.getElementById(`rlyEntry${i}`) ? document.getElementById(`rlyEntry${i}`).value : 0) || 0;
+        const extVal = parseInt(document.getElementById(`rlyExit${i}`) ? document.getElementById(`rlyExit${i}`).value : 0) || 0;
+        const entOn = (document.getElementById(`rlyEntOn${i}`) && document.getElementById(`rlyEntOn${i}`).checked) ? 1 : 0;
+        const extOn = (document.getElementById(`rlyExtOn${i}`) && document.getElementById(`rlyExtOn${i}`).checked) ? 1 : 0;
+        seqParams += `;rlyEntry${i}=${entVal};rlyExit${i}=${extVal};rlyEntOn${i}=${entOn};rlyExtOn${i}=${extOn}`;
+      }
+
+      // Power Groups
+      let grpParams = "";
+      for (let i = 1; i <= 5; i++) {
+        const gName = (document.getElementById(`grpName${i}`) ? document.getElementById(`grpName${i}`).value.trim() : "") || `GROUP ${i}`;
+        const activeChs = [];
+        for (let ch = 1; ch <= 8; ch++) {
+          const chBox = document.getElementById(`grp${i}_ch${ch}`);
+          if (chBox && chBox.checked) activeChs.push(ch);
+        }
+        const gSeq = activeChs.join(",");
+        grpParams += `;grpName${i}=${gName};grpSeq${i}=${gSeq}`;
+      }
+
+      const emgModeVal = document.getElementById("dashboard-emg-mode") ? document.getElementById("dashboard-emg-mode").value : (document.getElementById("admin-emg-mode") ? document.getElementById("admin-emg-mode").value : 0);
+      const emgMode2Val = document.getElementById("dashboard-emg-mode2") ? document.getElementById("dashboard-emg-mode2").value : 0;
+
+      const packet = `SET_CFG;bootText=${bootTextVal};ch1=${ch1Val};ch2=${ch2Val};ch3=${ch3Val};ch4=${ch4Val};ch5=${ch5Val};ch6=${ch6Val};ch7=${ch7Val};ch8=${ch8Val};style=${styleVal};font=${fontVal};bootFont=${bootFontVal};dispType=${dispTypeVal};interval=${intervalVal};longpress=${longpressVal};ssDelay=${ssDelayVal};buzzer=1;effName1=${effName1};effName2=${effName2};effName3=${effName3};effName4=${effName4};effName5=${effName5};effSeq1=${effSeq1};effSeq2=${effSeq2};effSeq3=${effSeq3};effSeq4=${effSeq4};effSeq5=${effSeq5};effTime1=${effTime1};effTime2=${effTime2};effTime3=${effTime3};effTime4=${effTime4};effTime5=${effTime5};effLoop1=${effLoop1};effLoop2=${effLoop2};effLoop3=${effLoop3};effLoop4=${effLoop4};effLoop5=${effLoop5}${seqParams}${grpParams};emgMode=${emgModeVal};emgMode2=${emgMode2Val};order=${orderStr};pass=${deviceAdminPass}`;
+
+      writeSerial(packet);
+    };
+
+    document.getElementById("btn-defaults").onclick = () => {
+      if (confirm("Restore factory default configuration? This will clear the NVS memory partition (wiping names, channel labels, custom ordering, and system configurations) and reboot the controller board.")) {
+        writeSerial(`RESET_CFG;pass=${deviceAdminPass}`);
+      }
+    };
+
+    document.getElementById("btn-reboot-header").onclick = async () => {
+      if (!port) return;
+      if (confirm("Reboot the Osprey Controller device now?")) {
+        writeSerial(`REBOOT;pass=${deviceAdminPass}`);
+      }
+    };
+
+    logMessage("Ready to connect. Use a Web Serial compatible browser.", "sys");
+    updateConnectionUI(false); // start logged out
+  </script>
+</body>
+
+</html>
