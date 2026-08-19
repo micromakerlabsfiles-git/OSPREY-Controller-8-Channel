@@ -23,7 +23,7 @@ The Osprey Controller features a **tactile rotary encoder dial** with an integra
 
 ---
 
-## 2. Kerala Bus Audio Power Sequencer (Anti-Pop Delay System)
+## 2. Smart Audio Controller by OSPREY (Power Sequencer & Anti-Pop System)
 
 When high-power audio equipment (TV, Inverters, Mixers, Crossover Boards, DSPs, and MOSFET Amplifiers) powers on together, high-voltage inrush currents produce loud speaker pops and amplifier thumps.
 
