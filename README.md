@@ -9,14 +9,14 @@ Welcome to the **Osprey Controller (8-Channel Audio Sequencer & Power Manager)**
 The Osprey Controller features a **tactile rotary encoder dial** with an integrated push switch, a dedicated **Emergency / Action button (PBS-1)**, and a high-contrast OLED screen.
 
 ### Rotary Dial & Button Controls:
-- **Rotate Knob (Clockwise / Counter-Clockwise)**: Smoothly scroll through active menu modes with animated visual transitions.
+- **Rotate Knob (Clockwise / Counter-Clockwise)**: Smoothly scroll through active menu modes. Modes activate automatically after the configured **Dial Turn Activation Delay** (e.g. 1.0s settle time) or immediately when clicked, preventing relay chattering during fast rotation.
 - **Short Press Dial**:
+  - When scrolling: Immediately settles and activates the highlighted mode without waiting for the timer.
   - In **Manual Channel Modes** (MANUAL CH 1–8, MANUAL ALL ON): Toggles the highlighted relay channel **ON** / **OFF**.
   - In **Power Groups** (Modes 25–29): Activates or deactivates the power group with individual soft-start/shutdown delays.
   - In **Auto Modes**: Cancels the active auto timer and returns to Standby OFF.
-- **Long Press Dial (Hold for 1 sec)**:
-  - When in **STANDBY OFF**: Switches directly to **MANUAL ALL ON**.
-  - When in **ANY OTHER MODE**: Returns immediately to **STANDBY OFF** (applying exit delays for safe FIFO shutdown).
+- **Long Press Knob**:
+  - Hold the rotary knob down (0.5s to 5.0s) to toggle between **STANDBY (Safe FIFO All-OFF)** and **MANUAL ALL ON**.
 - **Emergency Button (PBS-1)**:
   - Single press triggers the configured emergency action immediately with **zero delay** (instant GPIO override).
   - Displays a 3-second countdown popup with active channel names and stays in the selected mode when dismissed.
@@ -31,14 +31,14 @@ The Osprey Controller eliminates this using **per-channel entry and exit delays*
 
 | Equipment | Channel | Startup (Entry Delay) | Shutdown (Exit Delay) | Function |
 |---|---|---|---|---|
-| **TV / Display** | CH 1 | **0 ms** (Instant) | **3000 ms** (Delayed) | Powers on first, stays alive until audio stops |
-| **Main Inverter** | CH 2 | **0 ms** (Instant) | **3000 ms** (Delayed) | Power source on first, cuts last |
-| **Audio Mixer** | CH 3 | **500 ms** (Soft-start) | **2000 ms** | Stabilizes audio signal |
-| **Crossover Board** | CH 4 | **500 ms** (Soft-start) | **2000 ms** | Clean frequency split |
-| **Audio DSP** | CH 5 | **3000 ms** (Delayed ON) | **0 ms** (Immediate OFF) | **Eliminates startup pop**; cuts first on power down |
-| **Subwoofer Amp** | CH 6 | **4000 ms** (Delayed ON) | **500 ms** | Powers on after DSP is stable |
-| **Main Mid/Horn Amp**| CH 7 | **4000 ms** (Delayed ON) | **500 ms** | Powers on after DSP is stable |
-| **Spare / Accent** | CH 8 | **0 ms** | **0 ms** | Auxiliary equipment |
+| **TV / Display** | CH 1 | **0.0s** (Instant) | **3.0s** (Delayed) | Powers on first, stays alive until audio stops |
+| **Main Inverter** | CH 2 | **0.0s** (Instant) | **3.0s** (Delayed) | Power source on first, cuts last |
+| **Audio Mixer** | CH 3 | **0.5s** (Soft-start) | **2.0s** | Stabilizes audio signal |
+| **Crossover Board** | CH 4 | **0.5s** (Soft-start) | **2.0s** | Clean frequency split |
+| **Audio DSP** | CH 5 | **3.0s** (Delayed ON) | **0.0s** (Immediate OFF) | **Eliminates startup pop**; cuts first on power down |
+| **Subwoofer Amp** | CH 6 | **4.0s** (Delayed ON) | **0.5s** | Powers on after DSP is stable |
+| **Main Mid/Horn Amp**| CH 7 | **4.0s** (Delayed ON) | **0.5s** | Powers on after DSP is stable |
+| **Spare / Accent** | CH 8 | **0.0s** | **0.0s** | Auxiliary equipment |
 
 ---
 
