@@ -837,6 +837,34 @@
       transform: translateY(-2px);
     }
 
+    /* Action Buttons Bar */
+    .button-group {
+      grid-column: span 2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+      padding: 1rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+    }
+
+    @media (max-width: 900px) {
+      .button-group {
+        grid-column: span 1;
+        flex-direction: column;
+        width: 100%;
+      }
+      .button-group .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
     /* Console logs Card */
     .console-card {
       grid-column: span 2;
@@ -1314,17 +1342,19 @@
     </div>
 
     <!-- Card 3: Menu Option Rearrangement & Options Editor -->
-    <div class="card" style="grid-column: span 2;">
+    <div class="card">
       <h2 class="card-title">
         <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
         </svg>
-        Configure & Rearrange Menu Options
+        Configure &amp; Rearrange Menu Options
       </h2>
-      <label>REARRANGE OPTIONS OR DELETE UNNECESSARY ONES (STANDBY OFF REMAINS LOCKED AT INDEX 1)</label>
+      <label style="font-size: 0.78rem; line-height: 1.4; color: var(--text-muted);">
+        Drag &amp; reorder modes or delete unused options. Standby remains locked at Index 1.
+      </label>
 
-      <div class="reorder-list" id="reorder-list">
+      <div class="reorder-list" id="reorder-list" style="max-height: 420px; overflow-y: auto; padding-right: 4px;">
         <!-- Will be populated dynamically by script -->
       </div>
 
@@ -1485,7 +1515,7 @@
 
       <!-- Per-Relay Delay Table -->
       <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
-        1. Per-Relay Delay Timers & Transition Toggles
+        1. Per-Relay Delay Timers &amp; Transition Toggles
       </h3>
 
       <div style="overflow-x: auto; margin-bottom: 1.75rem;">
@@ -1515,19 +1545,52 @@
       </div>
     </div>
 
-    <!-- Action Buttons -->
+    <!-- Hidden File Input for Importing Config Files -->
+    <input type="file" id="config-file-input" accept=".txt,.json,.ini" style="display:none;" onchange="importConfigFile(event)">
+
+    <!-- Bottom Action Buttons Bar (Full Width) -->
     <div class="button-group">
-      <button class="btn btn-secondary" id="btn-read">
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <button class="btn btn-primary" id="btn-save-bottom" onclick="document.getElementById('btn-write').click()"
+        style="padding: 10px 22px; font-size: 0.92rem; font-weight: 700;">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        Save &amp; Sync to Controller
+      </button>
+
+      <button class="btn btn-secondary" id="btn-export-file" onclick="exportConfigFile()"
+        style="padding: 10px 18px; font-size: 0.9rem; border-color: var(--teal); color: var(--teal);">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
         </svg>
-        Read Config
+        📥 Export Config (.txt)
       </button>
-      <button class="btn btn-secondary" id="btn-defaults">
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+
+      <button class="btn btn-secondary" id="btn-import-file" onclick="document.getElementById('config-file-input').click()"
+        style="padding: 10px 18px; font-size: 0.9rem; border-color: var(--accent); color: var(--accent);">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+        </svg>
+        📤 Upload Config (.txt)
+      </button>
+
+      <button class="btn btn-secondary" id="btn-read"
+        style="padding: 10px 18px; font-size: 0.9rem;">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3m-3-3v12" />
+        </svg>
+        Read Device Config
+      </button>
+
+      <button class="btn btn-secondary" id="btn-defaults"
+        style="padding: 10px 18px; font-size: 0.9rem; border-color: rgba(239, 68, 68, 0.4); color: var(--error);">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
         </svg>
         Reset Defaults
       </button>
@@ -2513,6 +2576,229 @@
       renderOrderList();
       populateEmergencyModes();
       logMessage("Smart Audio DSP Preset loaded with anti-pop delay parameters.", "sys");
+    }
+
+    // --- EXPORT & IMPORT CONFIGURATION FILE (.TXT / .JSON) ---
+    function exportConfigFile() {
+      const now = new Date();
+      const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const bootText = document.getElementById("bootText").value.trim() || "OSPREY CONTROLLER";
+      
+      let configText = `# ==========================================================\n`;
+      configText += `#  OSPREY 8-CHANNEL SMART AUDIO CONTROLLER CONFIGURATION\n`;
+      configText += `#  Exported: ${now.toLocaleString()}\n`;
+      configText += `#  Device Name: ${bootText}\n`;
+      configText += `# ==========================================================\n\n`;
+
+      configText += `[DEVICE]\n`;
+      configText += `bootText=${bootText}\n`;
+      configText += `bootFont=${document.getElementById("bootFont").value}\n`;
+      const styleRadio = document.querySelector('input[name="menuStyle"]:checked');
+      configText += `menuStyle=${styleRadio ? styleRadio.value : 1}\n`;
+      configText += `menuFont=${document.getElementById("menuFont").value}\n`;
+      configText += `autoInterval=${(parseInt(document.getElementById("autoInterval").value) || 120) * 1000}\n`;
+      configText += `longPress=${document.getElementById("longPress").value}\n`;
+      configText += `screensaverDelay=${(parseInt(document.getElementById("screensaverDelay").value) || 10) * 60000}\n\n`;
+
+      configText += `[CHANNELS]\n`;
+      for (let i = 1; i <= 8; i++) {
+        configText += `ch${i}=${document.getElementById(`ch${i}`).value.trim() || `CH ${i}`}\n`;
+      }
+      configText += `\n`;
+
+      configText += `[EMERGENCY_TRIGGER]\n`;
+      configText += `emgMode=${document.getElementById("dashboard-emg-mode") ? document.getElementById("dashboard-emg-mode").value : 0}\n`;
+      configText += `emgMode2=${document.getElementById("dashboard-emg-mode2") ? document.getElementById("dashboard-emg-mode2").value : 0}\n\n`;
+
+      configText += `[SEQUENCER_DELAYS]\n`;
+      for (let i = 1; i <= 8; i++) {
+        const entVal = parseInt(document.getElementById(`rlyEntry${i}`) ? document.getElementById(`rlyEntry${i}`).value : 0) || 0;
+        const extVal = parseInt(document.getElementById(`rlyExit${i}`) ? document.getElementById(`rlyExit${i}`).value : 0) || 0;
+        const entOn = (document.getElementById(`rlyEntOn${i}`) && document.getElementById(`rlyEntOn${i}`).checked) ? 1 : 0;
+        const extOn = (document.getElementById(`rlyExtOn${i}`) && document.getElementById(`rlyExtOn${i}`).checked) ? 1 : 0;
+        configText += `rlyEntry${i}=${entVal}\n`;
+        configText += `rlyEntOn${i}=${entOn}\n`;
+        configText += `rlyExit${i}=${extVal}\n`;
+        configText += `rlyExtOn${i}=${extOn}\n`;
+      }
+      configText += `\n`;
+
+      configText += `[POWER_GROUPS]\n`;
+      for (let i = 1; i <= 5; i++) {
+        const gName = (document.getElementById(`grpName${i}`) ? document.getElementById(`grpName${i}`).value.trim() : "") || `GROUP ${i}`;
+        const activeChs = [];
+        for (let ch = 1; ch <= 8; ch++) {
+          const chBox = document.getElementById(`grp${i}_ch${ch}`);
+          if (chBox && chBox.checked) activeChs.push(ch);
+        }
+        configText += `grpName${i}=${gName}\n`;
+        configText += `grpSeq${i}=${activeChs.join(",")}\n`;
+      }
+      configText += `\n`;
+
+      configText += `[CUSTOM_EFFECTS]\n`;
+      for (let i = 1; i <= 5; i++) {
+        configText += `effName${i}=${document.getElementById(`effName${i}`).value.trim() || `EFFECT ${i}`}\n`;
+        configText += `effSeq${i}=${document.getElementById(`effSeq${i}`).value.trim() || "1,2,3,4"}\n`;
+        configText += `effTime${i}=${document.getElementById(`effTime${i}`).value || 500}\n`;
+        configText += `effLoop${i}=${document.getElementById(`effLoop${i}`).checked ? 1 : 0}\n`;
+      }
+      configText += `\n`;
+
+      configText += `[MENU_ORDER]\n`;
+      configText += `order=${currentOrder.join(",")}\n`;
+
+      // Download file to client browser
+      const blob = new Blob([configText], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const cleanName = bootText.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
+      a.href = url;
+      a.download = `osprey_config_${cleanName}_${timestamp}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      logMessage(`Configuration exported to file: osprey_config_${cleanName}_${timestamp}.txt`, "sys");
+    }
+
+    function importConfigFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const text = e.target.result;
+        try {
+          parseAndApplyConfigText(text);
+          logMessage(`Successfully imported configuration file: ${file.name}`, "sys");
+          alert(`Configuration profile loaded successfully from "${file.name}"!\n\nAll channel labels, delays, groups, and modes have been populated. Click "Save & Sync to Controller" to flash them to the board.`);
+        } catch (err) {
+          logMessage(`Error loading configuration file: ${err.message}`, "err");
+          alert(`Failed to parse configuration file: ${err.message}`);
+        }
+        event.target.value = "";
+      };
+      reader.readAsText(file);
+    }
+
+    function parseAndApplyConfigText(text) {
+      let trimmed = text.trim();
+      if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+        const jsonCfg = JSON.parse(trimmed);
+        parseIncomingLine("CFG:" + JSON.stringify(jsonCfg));
+        return;
+      }
+
+      const lines = text.split(/\r?\n/);
+      const kvMap = {};
+      for (const line of lines) {
+        const clean = line.trim();
+        if (!clean || clean.startsWith("#") || clean.startsWith(";") || clean.startsWith("[")) continue;
+        const eqIdx = clean.indexOf("=");
+        if (eqIdx !== -1) {
+          const key = clean.substring(0, eqIdx).trim();
+          const val = clean.substring(eqIdx + 1).trim();
+          kvMap[key] = val;
+        }
+      }
+
+      if (kvMap.bootText !== undefined) {
+        document.getElementById("bootText").value = kvMap.bootText;
+        const titleEl = document.getElementById("header-device-title");
+        if (titleEl) titleEl.innerText = kvMap.bootText.toUpperCase();
+      }
+
+      if (kvMap.bootFont !== undefined) document.getElementById("bootFont").value = kvMap.bootFont;
+      if (kvMap.menuFont !== undefined) document.getElementById("menuFont").value = kvMap.menuFont;
+
+      if (kvMap.menuStyle !== undefined) {
+        const styleRadios = document.getElementsByName("menuStyle");
+        for (const radio of styleRadios) {
+          if (radio.value === kvMap.menuStyle) radio.checked = true;
+        }
+      }
+
+      if (kvMap.autoInterval !== undefined) {
+        const secInterval = Math.floor(parseInt(kvMap.autoInterval) / 1000) || 120;
+        document.getElementById("autoInterval").value = secInterval;
+        document.getElementById("autoIntervalVal").innerText = `${secInterval}s (${(secInterval / 60).toFixed(1)}m)`;
+      }
+
+      if (kvMap.longPress !== undefined) {
+        const lp = parseInt(kvMap.longPress) || 1000;
+        document.getElementById("longPress").value = lp;
+        document.getElementById("longPressVal").innerText = `${(lp / 1000).toFixed(1)}s`;
+      }
+
+      if (kvMap.screensaverDelay !== undefined) {
+        const ssMins = Math.round(parseInt(kvMap.screensaverDelay) / 60000) || 10;
+        document.getElementById("screensaverDelay").value = ssMins;
+        document.getElementById("screensaverDelayVal").innerText = `${ssMins} Min`;
+      }
+
+      for (let i = 1; i <= 8; i++) {
+        if (kvMap[`ch${i}`] !== undefined) document.getElementById(`ch${i}`).value = kvMap[`ch${i}`];
+      }
+
+      for (let i = 1; i <= 5; i++) {
+        if (kvMap[`effName${i}`] !== undefined) document.getElementById(`effName${i}`).value = kvMap[`effName${i}`];
+        if (kvMap[`effSeq${i}`] !== undefined) document.getElementById(`effSeq${i}`).value = kvMap[`effSeq${i}`];
+        if (kvMap[`effTime${i}`] !== undefined) document.getElementById(`effTime${i}`).value = kvMap[`effTime${i}`];
+        if (kvMap[`effLoop${i}`] !== undefined) document.getElementById(`effLoop${i}`).checked = (kvMap[`effLoop${i}`] === "1" || kvMap[`effLoop${i}`] === "true");
+      }
+
+      for (let i = 1; i <= 8; i++) {
+        if (kvMap[`rlyEntry${i}`] !== undefined) {
+          const el = document.getElementById(`rlyEntry${i}`);
+          if (el) el.value = kvMap[`rlyEntry${i}`];
+        }
+        if (kvMap[`rlyExit${i}`] !== undefined) {
+          const el = document.getElementById(`rlyExit${i}`);
+          if (el) el.value = kvMap[`rlyExit${i}`];
+        }
+        if (kvMap[`rlyEntOn${i}`] !== undefined) {
+          const el = document.getElementById(`rlyEntOn${i}`);
+          if (el) el.checked = (kvMap[`rlyEntOn${i}`] === "1" || kvMap[`rlyEntOn${i}`] === "true");
+        }
+        if (kvMap[`rlyExtOn${i}`] !== undefined) {
+          const el = document.getElementById(`rlyExtOn${i}`);
+          if (el) el.checked = (kvMap[`rlyExtOn${i}`] === "1" || kvMap[`rlyExtOn${i}`] === "true");
+        }
+      }
+
+      for (let i = 1; i <= 5; i++) {
+        if (kvMap[`grpName${i}`] !== undefined) {
+          const el = document.getElementById(`grpName${i}`);
+          if (el) el.value = kvMap[`grpName${i}`];
+        }
+        if (kvMap[`grpSeq${i}`] !== undefined) {
+          const seqStr = kvMap[`grpSeq${i}`] || "";
+          const activeChs = seqStr.split(",").map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+          for (let ch = 1; ch <= 8; ch++) {
+            const chBox = document.getElementById(`grp${i}_ch${ch}`);
+            if (chBox) chBox.checked = activeChs.includes(ch);
+          }
+        }
+      }
+
+      if (kvMap.order !== undefined) {
+        const orderArr = kvMap.order.split(",").map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+        if (orderArr.length > 0) currentOrder = orderArr;
+      }
+
+      populateEmergencyModes();
+
+      if (kvMap.emgMode !== undefined) {
+        if (document.getElementById("dashboard-emg-mode")) document.getElementById("dashboard-emg-mode").value = kvMap.emgMode;
+        if (document.getElementById("admin-emg-mode")) document.getElementById("admin-emg-mode").value = kvMap.emgMode;
+      }
+      if (kvMap.emgMode2 !== undefined) {
+        if (document.getElementById("dashboard-emg-mode2")) document.getElementById("dashboard-emg-mode2").value = kvMap.emgMode2;
+      }
+
+      updateSequencerChannelLabels();
+      renderOrderList();
     }
 
     // Sync labels dynamically
