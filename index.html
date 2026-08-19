@@ -1053,74 +1053,160 @@
   <!-- Dashboard Container -->
   <div class="main-container" id="dashboard-container">
 
-    <!-- Card 1: Branding & Channels -->
-    <div class="card">
-      <h2 class="card-title">
-        <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.43l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-        Device Branding & Channels
-      </h2>
-
-      <div class="form-group">
-        <label for="bootText">CONTROLLER NAME (BOOT TEXT)</label>
-        <input type="text" id="bootText" placeholder="OSPREY CONTROLLER" maxlength="32">
+    <!-- Card 1: Branding & Channels with Live Relay Test -->
+    <div class="card" style="grid-column: span 2;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 1.25rem;">
+        <h2 class="card-title" style="margin-bottom: 0;">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.43l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Device Branding &amp; Channel Labels (with Live Relay Test)
+        </h2>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-secondary" onclick="fillSampleAudioLabels()" style="padding: 6px 12px; font-size: 0.82rem; height: 34px; border-color: var(--accent); color: var(--accent); font-weight: 600;">
+            ✨ Fill Sample Audio Names (DSP, Amps...)
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="testAllRelays('toggle')" style="padding: 6px 12px; font-size: 0.82rem; height: 34px; border-color: var(--teal); color: var(--teal);">
+            ⚡ Test Toggle All Relays
+          </button>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="bootFont">BOOT TEXT FONT STYLE & SIZE</label>
-        <select id="bootFont" class="form-select">
-          <option value="0">Compact Small (8px Bold) [Default]</option>
-          <option value="1">Medium (10px Bold)</option>
-          <option value="2">Monospace (10px Classic)</option>
-          <option value="3">Profont (12px Retro)</option>
-          <option value="4">Large (14px Bold)</option>
-          <option value="5">Extra Large (18px Bold)</option>
-        </select>
+      <div class="form-row" style="margin-bottom: 1.25rem;">
+        <div class="form-group" style="flex: 1;">
+          <label for="bootText">CONTROLLER NAME (BOOT TEXT)</label>
+          <input type="text" id="bootText" placeholder="OSPREY CONTROLLER" maxlength="32">
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label for="bootFont">BOOT TEXT FONT STYLE &amp; SIZE</label>
+          <select id="bootFont" class="form-select">
+            <option value="0">Compact Small (8px Bold) [Default]</option>
+            <option value="1">Medium (10px Bold)</option>
+            <option value="2">Monospace (10px Classic)</option>
+            <option value="3">Profont (12px Retro)</option>
+            <option value="4">Large (14px Bold)</option>
+            <option value="5">Extra Large (18px Bold)</option>
+          </select>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label>CHANNEL LABELS (MAX 12 CHARS)</label>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="ch1">CHANNEL 1</label>
-            <input type="text" id="ch1" placeholder="CH 1" maxlength="12">
+      <div style="padding: 10px 14px; background: rgba(0, 122, 138, 0.06); border: 1px solid var(--teal-glow); border-radius: 8px; font-size: 0.82rem; margin-bottom: 1rem;">
+        <strong>💡 Quick Relay Finder:</strong> Click the <strong>⚡ Test Click</strong> button next to any channel to immediately trigger its physical relay and buzzer. This helps you identify terminal wiring in seconds!
+      </div>
+
+      <!-- 8 Channel Inputs with Interactive Test Buttons -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+        <!-- CH 1 -->
+        <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="ch1" style="font-size: 0.8rem; font-weight: 700; color: var(--accent); margin: 0;">CHANNEL 1</label>
+            <span id="test-pill-1" style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.06); color: var(--text-muted); font-weight: 600;">IDLE</span>
           </div>
-          <div class="form-group">
-            <label for="ch2">CHANNEL 2</label>
-            <input type="text" id="ch2" placeholder="CH 2" maxlength="12">
-          </div>
-        </div>
-        <div class="form-row" style="margin-top: 0.75rem;">
-          <div class="form-group">
-            <label for="ch3">CHANNEL 3</label>
-            <input type="text" id="ch3" placeholder="CH 3" maxlength="12">
-          </div>
-          <div class="form-group">
-            <label for="ch4">CHANNEL 4</label>
-            <input type="text" id="ch4" placeholder="CH 4" maxlength="12">
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="ch1" placeholder="e.g. DSP" value="CH 1" maxlength="12" style="flex: 1; padding: 7px 10px; font-size: 0.88rem;">
+            <button type="button" class="btn btn-secondary" onclick="testRelay(1)" style="padding: 6px 10px; font-size: 0.78rem; height: 36px; border-color: var(--teal); color: var(--teal); white-space: nowrap;">
+              ⚡ Test Click
+            </button>
           </div>
         </div>
-        <div class="form-row" style="margin-top: 0.75rem;">
-          <div class="form-group">
-            <label for="ch5">CHANNEL 5</label>
-            <input type="text" id="ch5" placeholder="CH 5" maxlength="12">
+
+        <!-- CH 2 -->
+        <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="ch2" style="font-size: 0.8rem; font-weight: 700; color: var(--accent); margin: 0;">CHANNEL 2</label>
+            <span id="test-pill-2" style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.06); color: var(--text-muted); font-weight: 600;">IDLE</span>
           </div>
-          <div class="form-group">
-            <label for="ch6">CHANNEL 6</label>
-            <input type="text" id="ch6" placeholder="CH 6" maxlength="12">
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="ch2" placeholder="e.g. SUB AMP" value="CH 2" maxlength="12" style="flex: 1; padding: 7px 10px; font-size: 0.88rem;">
+            <button type="button" class="btn btn-secondary" onclick="testRelay(2)" style="padding: 6px 10px; font-size: 0.78rem; height: 36px; border-color: var(--teal); color: var(--teal); white-space: nowrap;">
+              ⚡ Test Click
+            </button>
           </div>
         </div>
-        <div class="form-row" style="margin-top: 0.75rem;">
-          <div class="form-group">
-            <label for="ch7">CHANNEL 7</label>
-            <input type="text" id="ch7" placeholder="CH 7" maxlength="12">
+
+        <!-- CH 3 -->
+        <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="ch3" style="font-size: 0.8rem; font-weight: 700; color: var(--accent); margin: 0;">CHANNEL 3</label>
+            <span id="test-pill-3" style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.06); color: var(--text-muted); font-weight: 600;">IDLE</span>
           </div>
-          <div class="form-group">
-            <label for="ch8">CHANNEL 8</label>
-            <input type="text" id="ch8" placeholder="CH 8" maxlength="12">
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="ch3" placeholder="e.g. MAIN AMPS" value="CH 3" maxlength="12" style="flex: 1; padding: 7px 10px; font-size: 0.88rem;">
+            <button type="button" class="btn btn-secondary" onclick="testRelay(3)" style="padding: 6px 10px; font-size: 0.78rem; height: 36px; border-color: var(--teal); color: var(--teal); white-space: nowrap;">
+              ⚡ Test Click
+            </button>
+          </div>
+        </div>
+
+        <!-- CH 4 -->
+        <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="ch4" style="font-size: 0.8rem; font-weight: 700; color: var(--accent); margin: 0;">CHANNEL 4</label>
+            <span id="test-pill-4" style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.06); color: var(--text-muted); font-weight: 600;">IDLE</span>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="ch4" placeholder="e.g. MIXER" value="CH 4" maxlength="12" style="flex: 1; padding: 7px 10px; font-size: 0.88rem;">
+            <button type="button" class="btn btn-secondary" onclick="testRelay(4)" style="padding: 6px 10px; font-size: 0.78rem; height: 36px; border-color: var(--teal); color: var(--teal); white-space: nowrap;">
+              ⚡ Test Click
+            </button>
+          </div>
+        </div>
+
+        <!-- CH 5 -->
+        <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="ch5" style="font-size: 0.8rem; font-weight: 700; color: var(--accent); margin: 0;">CHANNEL 5</label>
+            <span id="test-pill-5" style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.06); color: var(--text-muted); font-weight: 600;">IDLE</span>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="ch5" placeholder="e.g. CROSSOVER" value="CH 5" maxlength="12" style="flex: 1; padding: 7px 10px; font-size: 0.88rem;">
+            <button type="button" class="btn btn-secondary" onclick="testRelay(5)" style="padding: 6px 10px; font-size: 0.78rem; height: 36px; border-color: var(--teal); color: var(--teal); white-space: nowrap;">
+              ⚡ Test Click
+            </button>
+          </div>
+        </div>
+
+        <!-- CH 6 -->
+        <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="ch6" style="font-size: 0.8rem; font-weight: 700; color: var(--accent); margin: 0;">CHANNEL 6</label>
+            <span id="test-pill-6" style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.06); color: var(--text-muted); font-weight: 600;">IDLE</span>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="ch6" placeholder="e.g. TV DISPLAY" value="CH 6" maxlength="12" style="flex: 1; padding: 7px 10px; font-size: 0.88rem;">
+            <button type="button" class="btn btn-secondary" onclick="testRelay(6)" style="padding: 6px 10px; font-size: 0.78rem; height: 36px; border-color: var(--teal); color: var(--teal); white-space: nowrap;">
+              ⚡ Test Click
+            </button>
+          </div>
+        </div>
+
+        <!-- CH 7 -->
+        <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="ch7" style="font-size: 0.8rem; font-weight: 700; color: var(--accent); margin: 0;">CHANNEL 7</label>
+            <span id="test-pill-7" style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.06); color: var(--text-muted); font-weight: 600;">IDLE</span>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="ch7" placeholder="e.g. INVERTER" value="CH 7" maxlength="12" style="flex: 1; padding: 7px 10px; font-size: 0.88rem;">
+            <button type="button" class="btn btn-secondary" onclick="testRelay(7)" style="padding: 6px 10px; font-size: 0.78rem; height: 36px; border-color: var(--teal); color: var(--teal); white-space: nowrap;">
+              ⚡ Test Click
+            </button>
+          </div>
+        </div>
+
+        <!-- CH 8 -->
+        <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="ch8" style="font-size: 0.8rem; font-weight: 700; color: var(--accent); margin: 0;">CHANNEL 8</label>
+            <span id="test-pill-8" style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.06); color: var(--text-muted); font-weight: 600;">IDLE</span>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="ch8" placeholder="e.g. HORNS / AUX" value="CH 8" maxlength="12" style="flex: 1; padding: 7px 10px; font-size: 0.88rem;">
+            <button type="button" class="btn btn-secondary" onclick="testRelay(8)" style="padding: 6px 10px; font-size: 0.78rem; height: 36px; border-color: var(--teal); color: var(--teal); white-space: nowrap;">
+              ⚡ Test Click
+            </button>
           </div>
         </div>
       </div>
@@ -1378,7 +1464,7 @@
       </div>
     </div>
 
-    <!-- Card 3B: Power Sequencer & Audio Groups (Kerala Bus Audio Anti-Pop Delay System) -->
+    <!-- Card 3B: Smart Audio Controller & Power Sequencer by OSPREY -->
     <div class="card" style="grid-column: span 2;">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem;">
         <h2 class="card-title" style="margin-bottom: 0;">
@@ -1386,15 +1472,15 @@
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          Power Sequencer & Equipment Groups (Kerala Bus Audio Anti-Pop)
+          Smart Audio Controller &amp; Power Sequencer by OSPREY
         </h2>
-        <button class="btn btn-secondary" onclick="loadKeralaBusPreset()" style="padding: 6px 14px; font-size: 0.82rem; height: 34px; border-color: var(--accent); color: var(--accent); font-weight: 600;">
-          ⚡ Load Kerala Bus DSP Preset
+        <button class="btn btn-secondary" onclick="loadSmartAudioPreset()" style="padding: 6px 14px; font-size: 0.82rem; height: 34px; border-color: var(--accent); color: var(--accent); font-weight: 600;">
+          ⚡ Load Smart Audio DSP Preset
         </button>
       </div>
 
       <div style="padding: 10px 14px; background: rgba(0, 122, 138, 0.06); border: 1px solid var(--teal-glow); border-radius: 8px; font-size: 0.84rem; margin-bottom: 1.25rem; line-height: 1.45;">
-        <strong>🛡️ Audio Pop Protection / FIFO Safe Shutdown:</strong> When multiple heavy audio components (DSP, Amps, Inverters, TV) switch simultaneously, high-voltage surges produce loud speaker pops. Configure <strong>Entry Delay (ON)</strong> so amplifiers & DSPs wake up softly, and <strong>Exit Delay (OFF)</strong> so sensitive processors power down safely before the master inverter cuts.
+        <strong>🛡️ Smart Audio Controller by OSPREY:</strong> When multi-channel amplifiers, DSPs, inverters, and source units power on simultaneously, high inrush currents cause loud speaker cracks. The Osprey Sequencer prevents this with <strong>Entry Delay (ON)</strong> soft-start and <strong>Exit Delay (OFF)</strong> safe FIFO shutdown.
       </div>
 
       <!-- Per-Relay Delay Table -->
@@ -1479,7 +1565,7 @@
         high-contrast OLED display.
       </p>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
         <!-- Control 1 -->
         <div
           style="padding: 1rem; background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px;">
@@ -1489,10 +1575,10 @@
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            Rotate Knob (Clockwise / Counter-CW)
+            Rotate Knob (CW / CCW)
           </div>
           <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.4;">
-            Scrolls smoothly through menus and modes with animated carousel transitions on the OLED screen.
+            Scrolls smoothly through modes with animated carousel transitions on the OLED screen.
           </p>
         </div>
 
@@ -1506,10 +1592,10 @@
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
             </svg>
-            Encoder Push Button (Short Press)
+            Encoder Dial (Short Click)
           </div>
           <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.4;">
-            Activates highlighted mode or toggles the selected channel relay <strong>ON</strong> / <strong>OFF</strong> in manual mode.
+            Toggles highlighted channel <strong>ON/OFF</strong> in manual mode, or activates power groups with delays.
           </p>
         </div>
 
@@ -1517,26 +1603,46 @@
         <div
           style="padding: 1rem; background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px;">
           <div
-            style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--error); margin-bottom: 6px;">
+            style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: #eab308; margin-bottom: 6px;">
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
-            Encoder Push Button (Long Press)
+            Encoder Dial (Long Press)
           </div>
           <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.4;">
-            Triggers <strong>STANDBY (All OFF)</strong> from active modes, or switches to <strong>ALL CHANNELS ON</strong> when already in Standby.
+            Triggers <strong>STANDBY (Safe FIFO All OFF)</strong> or switches to <strong>MANUAL ALL ON</strong>.
+          </p>
+        </div>
+
+        <!-- Control 4: Emergency PBS-1 Push Button -->
+        <div
+          style="padding: 1rem; background: rgba(230, 57, 70, 0.06); border: 1px solid rgba(230, 57, 70, 0.3); border-radius: 10px;">
+          <div
+            style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--error); margin-bottom: 6px;">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 9v3.75m0-10.5a9 9 0 11-18 0 9 9 0 0118 0zm0 14.25h.008v.008H12v-.008z" />
+            </svg>
+            Emergency Button (PBS-1)
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.4;">
+            Single-press triggers <strong>instant hardware override</strong> (0ms delay), shows 3s countdown popup, and stays locked in mode.
           </p>
         </div>
       </div>
 
+      <!-- Smart Audio Power Sequencer Guide -->
       <div
-        style="margin-top: 1rem; padding: 12px; background: rgba(0, 122, 138, 0.05); border: 1px solid var(--teal-glow); border-radius: 8px; font-size: 0.85rem; line-height: 1.5;">
-        <strong style="color: var(--teal);">💡 Visual OLED Status &amp; Safety Delays:</strong>
-        <ul style="margin-left: 1.25rem; margin-top: 4px;">
-          <li><strong>White BG + Black Text:</strong> Manual channel relay is ACTIVE (ON).</li>
-          <li><strong>Black BG + White Text:</strong> Manual channel relay is INACTIVE (OFF).</li>
-          <li><strong>Sequential Delays:</strong> Anti-pop delay protection sequences equipment automatically upon mode or group activation.</li>
+        style="margin-top: 1.25rem; padding: 14px 16px; background: rgba(0, 122, 138, 0.06); border: 1px solid var(--teal-glow); border-radius: 8px; font-size: 0.86rem; line-height: 1.5;">
+        <strong style="color: var(--teal); font-size: 0.92rem;">🛡️ Smart Audio Controller by OSPREY (Power Sequencer &amp; Anti-Pop Protection):</strong>
+        <p style="margin-top: 4px; color: var(--text-main);">
+          When multi-channel MOSFET amplifiers, DSPs, inverters, and source units power on simultaneously, high inrush currents cause loud speaker cracks. The Osprey Sequencer coordinates power safely:
+        </p>
+        <ul style="margin-left: 1.25rem; margin-top: 6px; color: var(--text-main);">
+          <li><strong>Soft-Start Startup (Entry Delay):</strong> Inverter &amp; TV turn ON first (0ms) &rarr; Mixer &amp; Crossover (500ms) &rarr; DSP wakes up cleanly (3000ms) &rarr; Heavy Sub &amp; Vocal Amps turn on last (4000ms).</li>
+          <li><strong>Safe FIFO Shutdown (Exit Delay):</strong> DSP cuts out instantly (0ms) &rarr; Amplifiers power down &rarr; Mixers cut &rarr; Main inverters cut last (3000ms).</li>
+          <li><strong>Visual Channel Badges:</strong> Solid Box = ON, Outlined + Center Dots = Delay Counting Down (Pending), Outlined = OFF.</li>
         </ul>
       </div>
     </div>
@@ -2293,61 +2399,95 @@
       }
     }
 
-    // Preset for Kerala Bus Sound System (Varma's / AS Plus high-output setup)
-    function loadKeralaBusPreset() {
-      if (!confirm("Load recommended Kerala Bus Audio preset delays and equipment groups?\n\nThis will configure anti-pop startup delays (DSP 3000ms delay, Inverter/TV instant, Amps 4000ms) and FIFO shutdown timers.")) return;
+    // --- LIVE RELAY TESTING & IDENTIFIER FUNCTIONS ---
+    function testRelay(ch) {
+      if (!port || !port.writable) {
+        alert("Device Not Connected! Please connect your Osprey Controller via USB first to test physical relays.");
+        logMessage("Cannot test relay: Serial connection not open.", "err");
+        return;
+      }
+      const pill = document.getElementById(`test-pill-${ch}`);
+      if (pill) {
+        pill.style.background = "rgba(74, 210, 228, 0.25)";
+        pill.style.color = "var(--teal)";
+        pill.textContent = "CLICKING...";
+      }
+      writeSerial(`TEST_RELAY;ch=${ch};state=toggle;pass=${deviceAdminPass}`);
+      logMessage(`Triggered live hardware test for Relay Channel ${ch}`, "sys");
+    }
 
-      // 1. Channel Names
-      const names = ["TV", "INVERTER", "MIXER", "CROSSOVER", "DSP", "SUB AMP", "MAIN AMP", "SPARE"];
+    function testAllRelays(state = 'toggle') {
+      if (!port || !port.writable) {
+        alert("Device Not Connected! Please connect your Osprey Controller via USB first to test physical relays.");
+        logMessage("Cannot test relays: Serial connection not open.", "err");
+        return;
+      }
+      writeSerial(`TEST_ALL;state=${state};pass=${deviceAdminPass}`);
+      logMessage(`Triggered live hardware test for ALL relay channels (${state})`, "sys");
+    }
+
+    function fillSampleAudioLabels() {
+      const sampleNames = ["DSP", "SUBWOOFER", "MAIN AMPS", "AUDIO MIXER", "CROSSOVER", "TV DISPLAY", "INVERTER", "HORNS / AUX"];
       for (let i = 1; i <= 8; i++) {
         const el = document.getElementById(`ch${i}`);
-        if (el) el.value = names[i - 1];
+        if (el) el.value = sampleNames[i - 1];
       }
+      updateSequencerChannelLabels();
+      renderOrderList();
+      populateEmergencyModes();
+      logMessage("Filled sample audio equipment names (DSP, Subwoofer, Main Amps, Mixer...). Click 'Save & Sync' to persist.", "sys");
+    }
+
+    // Preset for Smart Audio Controller by OSPREY
+    function loadSmartAudioPreset() {
+      if (!confirm("Load recommended Smart Audio DSP Preset delays and equipment groups?\n\nThis will configure soft-start anti-pop delays (DSP 3000ms delay, Inverter/TV instant, Amps 4000ms) and safe FIFO shutdown timers.")) return;
+
+      fillSampleAudioLabels();
 
       // 2. Delays & Toggles (Anti-Pop Tuning)
-      // CH1 (TV): Entry 0ms (OFF), Exit 3000ms (ON)
-      document.getElementById("rlyEntry1").value = 0;
-      document.getElementById("rlyEntOn1").checked = false;
-      document.getElementById("rlyExit1").value = 3000;
-      document.getElementById("rlyExtOn1").checked = true;
+      // CH1 (DSP): Entry 3000ms (ON) [Avoids startup crack], Exit 0ms (OFF) [First to cut!]
+      document.getElementById("rlyEntry1").value = 3000;
+      document.getElementById("rlyEntOn1").checked = true;
+      document.getElementById("rlyExit1").value = 0;
+      document.getElementById("rlyExtOn1").checked = false;
 
-      // CH2 (Inverter): Entry 0ms (OFF), Exit 3000ms (ON)
-      document.getElementById("rlyEntry2").value = 0;
-      document.getElementById("rlyEntOn2").checked = false;
-      document.getElementById("rlyExit2").value = 3000;
+      // CH2 (Subwoofer): Entry 4000ms (ON) [Powers on after DSP is stable], Exit 500ms (ON)
+      document.getElementById("rlyEntry2").value = 4000;
+      document.getElementById("rlyEntOn2").checked = true;
+      document.getElementById("rlyExit2").value = 500;
       document.getElementById("rlyExtOn2").checked = true;
 
-      // CH3 (Mixer): Entry 500ms (ON), Exit 2000ms (ON)
-      document.getElementById("rlyEntry3").value = 500;
+      // CH3 (Main Amps): Entry 4000ms (ON), Exit 500ms (ON)
+      document.getElementById("rlyEntry3").value = 4000;
       document.getElementById("rlyEntOn3").checked = true;
-      document.getElementById("rlyExit3").value = 2000;
+      document.getElementById("rlyExit3").value = 500;
       document.getElementById("rlyExtOn3").checked = true;
 
-      // CH4 (Crossover): Entry 500ms (ON), Exit 2000ms (ON)
+      // CH4 (Audio Mixer): Entry 500ms (ON), Exit 2000ms (ON)
       document.getElementById("rlyEntry4").value = 500;
       document.getElementById("rlyEntOn4").checked = true;
       document.getElementById("rlyExit4").value = 2000;
       document.getElementById("rlyExtOn4").checked = true;
 
-      // CH5 (DSP): Entry 3000ms (ON) [Avoids startup crack], Exit 0ms (OFF) [First to cut!]
-      document.getElementById("rlyEntry5").value = 3000;
+      // CH5 (Crossover): Entry 500ms (ON), Exit 2000ms (ON)
+      document.getElementById("rlyEntry5").value = 500;
       document.getElementById("rlyEntOn5").checked = true;
-      document.getElementById("rlyExit5").value = 0;
-      document.getElementById("rlyExtOn5").checked = false;
+      document.getElementById("rlyExit5").value = 2000;
+      document.getElementById("rlyExtOn5").checked = true;
 
-      // CH6 (Sub Amp): Entry 4000ms (ON) [Powers on after DSP is stable], Exit 500ms (ON)
-      document.getElementById("rlyEntry6").value = 4000;
-      document.getElementById("rlyEntOn6").checked = true;
-      document.getElementById("rlyExit6").value = 500;
+      // CH6 (TV Display): Entry 0ms (OFF), Exit 3000ms (ON)
+      document.getElementById("rlyEntry6").value = 0;
+      document.getElementById("rlyEntOn6").checked = false;
+      document.getElementById("rlyExit6").value = 3000;
       document.getElementById("rlyExtOn6").checked = true;
 
-      // CH7 (Main Amp): Entry 4000ms (ON), Exit 500ms (ON)
-      document.getElementById("rlyEntry7").value = 4000;
-      document.getElementById("rlyEntOn7").checked = true;
-      document.getElementById("rlyExit7").value = 500;
+      // CH7 (Inverter): Entry 0ms (OFF), Exit 3000ms (ON)
+      document.getElementById("rlyEntry7").value = 0;
+      document.getElementById("rlyEntOn7").checked = false;
+      document.getElementById("rlyExit7").value = 3000;
       document.getElementById("rlyExtOn7").checked = true;
 
-      // CH8 (Spare): Entry 0ms, Exit 0ms
+      // CH8 (Horns/Aux): Entry 0ms, Exit 0ms
       document.getElementById("rlyEntry8").value = 0;
       document.getElementById("rlyEntOn8").checked = false;
       document.getElementById("rlyExit8").value = 0;
@@ -2358,21 +2498,21 @@
       [1,2,3,4,5,6,7].forEach(ch => { document.getElementById(`grp1_ch${ch}`).checked = true; });
 
       document.getElementById("grpName2").value = "DSP & AMPS";
-      [1,2,5,6,7].forEach(ch => { document.getElementById(`grp2_ch${ch}`).checked = true; });
+      [1,2,3,6,7].forEach(ch => { document.getElementById(`grp2_ch${ch}`).checked = true; });
 
       document.getElementById("grpName3").value = "TV & MIXER";
-      [1,2,3].forEach(ch => { document.getElementById(`grp3_ch${ch}`).checked = true; });
+      [4,6,7].forEach(ch => { document.getElementById(`grp3_ch${ch}`).checked = true; });
 
       document.getElementById("grpName4").value = "VOCALS ONLY";
-      [1,2,3,4,7].forEach(ch => { document.getElementById(`grp4_ch${ch}`).checked = true; });
+      [1,3,4,5,7].forEach(ch => { document.getElementById(`grp4_ch${ch}`).checked = true; });
 
       document.getElementById("grpName5").value = "SUBWOOFER ONLY";
-      [1,2,3,4,6].forEach(ch => { document.getElementById(`grp5_ch${ch}`).checked = true; });
+      [1,2,4,5,7].forEach(ch => { document.getElementById(`grp5_ch${ch}`).checked = true; });
 
       updateSequencerChannelLabels();
       renderOrderList();
       populateEmergencyModes();
-      logMessage("Kerala Bus Audio Preset loaded with anti-pop DSP delay parameters.", "sys");
+      logMessage("Smart Audio DSP Preset loaded with anti-pop delay parameters.", "sys");
     }
 
     // Sync labels dynamically
@@ -2723,6 +2863,50 @@
       } else if (line.includes("SET_OK")) {
         logMessage("Configuration saved and synced successfully!", "sys");
         alert("Settings synced and saved successfully!");
+      } else if (line.startsWith("TEST_RELAY_OK")) {
+        try {
+          const chMatch = line.match(/ch=(\d+)/);
+          const stateMatch = line.match(/state=(\d+)/);
+          if (chMatch && stateMatch) {
+            const ch = parseInt(chMatch[1]);
+            const state = parseInt(stateMatch[1]);
+            const pill = document.getElementById(`test-pill-${ch}`);
+            if (pill) {
+              if (state === 1) {
+                pill.style.background = "rgba(74, 222, 128, 0.2)";
+                pill.style.color = "var(--success)";
+                pill.textContent = "RELAY ON";
+              } else {
+                pill.style.background = "rgba(0, 0, 0, 0.06)";
+                pill.style.color = "var(--text-muted)";
+                pill.textContent = "RELAY OFF";
+              }
+            }
+            logMessage(`Relay ${ch} physical test confirmed: ${state === 1 ? 'ENERGIZED (ON)' : 'RELEASED (OFF)'}`, "sys");
+          }
+        } catch (e) {}
+      } else if (line.startsWith("TEST_ALL_OK")) {
+        try {
+          const stateMatch = line.match(/state=(\d+)/);
+          if (stateMatch) {
+            const state = parseInt(stateMatch[1]);
+            for (let ch = 1; ch <= 8; ch++) {
+              const pill = document.getElementById(`test-pill-${ch}`);
+              if (pill) {
+                if (state === 1) {
+                  pill.style.background = "rgba(74, 222, 128, 0.2)";
+                  pill.style.color = "var(--success)";
+                  pill.textContent = "RELAY ON";
+                } else {
+                  pill.style.background = "rgba(0, 0, 0, 0.06)";
+                  pill.style.color = "var(--text-muted)";
+                  pill.textContent = "RELAY OFF";
+                }
+              }
+            }
+            logMessage(`ALL Relays test confirmed: ${state === 1 ? 'ALL ENERGIZED (ON)' : 'ALL RELEASED (OFF)'}`, "sys");
+          }
+        } catch (e) {}
       } else if (line.includes("REBOOT_OK")) {
         logMessage("Reboot command acknowledged. Device is restarting...", "sys");
       } else if (line.includes("RESET_OK")) {
