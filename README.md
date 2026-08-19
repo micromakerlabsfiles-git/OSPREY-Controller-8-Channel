@@ -68,7 +68,9 @@ The Osprey Controller has **8 independent relay channels** (CH 1–8).
 
 Open the Web Manager in Google Chrome, Microsoft Edge, or Opera on Desktop:
 1. Connect the ESP32 controller via USB.
-2. Click **Connect Controller** to read configurations.
-3. Customize channel names, entry/exit delays, power groups, fonts, and screensaver timeouts.
-4. Click **⚡ Load Kerala Bus DSP Preset** to auto-fill recommended audio delays.
-5. Click **Save & Sync** to store settings in microcontroller NVS flash.
+2. Click **Connect Controller** to read live configurations from the board.
+3. Customize channel names, entry/exit delays, power groups, fonts, screensaver timeouts, and emergency triggers.
+4. Click **⚡ Load Smart Audio DSP Preset** to auto-fill recommended audio delays.
+5. Click **📥 Export Config (.txt)** to backup and save your settings into a readable `.txt` profile.
+6. Click **📤 Upload Config (.txt)** to restore or share saved profiles across multiple controllers.
+7. Click **Save & Sync to Controller** to flash and persist all settings in microcontroller NVS flash.
