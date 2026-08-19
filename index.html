@@ -1295,10 +1295,24 @@
 
       <div class="range-container">
         <div class="range-header">
-          <label for="longPress">MODE ACTIVATION DELAY</label>
+          <div>
+            <label for="longPress" style="margin-bottom: 0;">LONG-PRESS KNOB TIMER</label>
+            <span style="font-size: 0.72rem; color: var(--text-muted); display: block;">Hold rotary knob duration to toggle Standby (All-OFF) / All-ON</span>
+          </div>
           <span class="range-value" id="longPressVal">1.0s</span>
         </div>
         <input type="range" id="longPress" min="500" max="5000" step="100" value="1000">
+      </div>
+
+      <div class="range-container">
+        <div class="range-header">
+          <div>
+            <label for="modeDelay" style="margin-bottom: 0;">DIAL TURN ACTIVATION DELAY (SCROLL SETTLE)</label>
+            <span style="font-size: 0.72rem; color: var(--text-muted); display: block;">Delay after scrolling to a mode before relays activate (prevents chattering during fast knob turns)</span>
+          </div>
+          <span class="range-value" id="modeDelayVal">1.0s</span>
+        </div>
+        <input type="range" id="modeDelay" min="0" max="5000" step="100" value="1000">
       </div>
 
       <div class="range-container">
@@ -1394,8 +1408,8 @@
               <input type="text" id="effSeq1" placeholder="1,2,3,4" value="1,2,3,4">
             </div>
             <div class="form-group" style="margin:0;">
-              <label for="effTime1">STEP INTERVAL (MS)</label>
-              <input type="number" id="effTime1" placeholder="500" value="500" min="50" max="10000" step="50">
+              <label for="effTime1">STEP INTERVAL (SEC)</label>
+              <input type="number" id="effTime1" placeholder="0.5" value="0.5" min="0.05" max="10.0" step="0.05">
             </div>
             <div class="form-group" style="margin:0; display: flex; align-items: center; gap: 10px;">
               <input type="checkbox" id="effLoop1" checked style="width: auto; margin: 0; cursor: pointer;">
@@ -1416,8 +1430,8 @@
               <input type="text" id="effSeq2" placeholder="5,6,7,8" value="5,6,7,8">
             </div>
             <div class="form-group" style="margin:0;">
-              <label for="effTime2">STEP INTERVAL (MS)</label>
-              <input type="number" id="effTime2" placeholder="500" value="500" min="50" max="10000" step="50">
+              <label for="effTime2">STEP INTERVAL (SEC)</label>
+              <input type="number" id="effTime2" placeholder="0.5" value="0.5" min="0.05" max="10.0" step="0.05">
             </div>
             <div class="form-group" style="margin:0; display: flex; align-items: center; gap: 10px;">
               <input type="checkbox" id="effLoop2" checked style="width: auto; margin: 0; cursor: pointer;">
@@ -1438,8 +1452,8 @@
               <input type="text" id="effSeq3" placeholder="1,3,5,7" value="1,3,5,7">
             </div>
             <div class="form-group" style="margin:0;">
-              <label for="effTime3">STEP INTERVAL (MS)</label>
-              <input type="number" id="effTime3" placeholder="500" value="500" min="50" max="10000" step="50">
+              <label for="effTime3">STEP INTERVAL (SEC)</label>
+              <input type="number" id="effTime3" placeholder="0.5" value="0.5" min="0.05" max="10.0" step="0.05">
             </div>
             <div class="form-group" style="margin:0; display: flex; align-items: center; gap: 10px;">
               <input type="checkbox" id="effLoop3" checked style="width: auto; margin: 0; cursor: pointer;">
@@ -1460,8 +1474,8 @@
               <input type="text" id="effSeq4" placeholder="2,4,6,8" value="2,4,6,8">
             </div>
             <div class="form-group" style="margin:0;">
-              <label for="effTime4">STEP INTERVAL (MS)</label>
-              <input type="number" id="effTime4" placeholder="500" value="500" min="50" max="10000" step="50">
+              <label for="effTime4">STEP INTERVAL (SEC)</label>
+              <input type="number" id="effTime4" placeholder="0.5" value="0.5" min="0.05" max="10.0" step="0.05">
             </div>
             <div class="form-group" style="margin:0; display: flex; align-items: center; gap: 10px;">
               <input type="checkbox" id="effLoop4" checked style="width: auto; margin: 0; cursor: pointer;">
@@ -1482,8 +1496,8 @@
               <input type="text" id="effSeq5" placeholder="1,2,3,4,5,6,7,8" value="1,2,3,4,5,6,7,8">
             </div>
             <div class="form-group" style="margin:0;">
-              <label for="effTime5">STEP INTERVAL (MS)</label>
-              <input type="number" id="effTime5" placeholder="500" value="500" min="50" max="10000" step="50">
+              <label for="effTime5">STEP INTERVAL (SEC)</label>
+              <input type="number" id="effTime5" placeholder="0.5" value="0.5" min="0.05" max="10.0" step="0.05">
             </div>
             <div class="form-group" style="margin:0; display: flex; align-items: center; gap: 10px;">
               <input type="checkbox" id="effLoop5" checked style="width: auto; margin: 0; cursor: pointer;">
@@ -1523,9 +1537,9 @@
           <thead>
             <tr style="border-bottom: 1px solid var(--card-border); color: var(--text-muted);">
               <th style="padding: 8px 12px;">CHANNEL</th>
-              <th style="padding: 8px 12px;">ENTRY DELAY (ON)</th>
+              <th style="padding: 8px 12px;">ENTRY DELAY (SEC)</th>
               <th style="padding: 8px 12px;">ENTRY ACTIVE</th>
-              <th style="padding: 8px 12px;">EXIT DELAY (OFF)</th>
+              <th style="padding: 8px 12px;">EXIT DELAY (SEC)</th>
               <th style="padding: 8px 12px;">EXIT ACTIVE</th>
             </tr>
           </thead>
@@ -1703,8 +1717,8 @@
           When multi-channel MOSFET amplifiers, DSPs, inverters, and source units power on simultaneously, high inrush currents cause loud speaker cracks. The Osprey Sequencer coordinates power safely:
         </p>
         <ul style="margin-left: 1.25rem; margin-top: 6px; color: var(--text-main);">
-          <li><strong>Soft-Start Startup (Entry Delay):</strong> Inverter &amp; TV turn ON first (0ms) &rarr; Mixer &amp; Crossover (500ms) &rarr; DSP wakes up cleanly (3000ms) &rarr; Heavy Sub &amp; Vocal Amps turn on last (4000ms).</li>
-          <li><strong>Safe FIFO Shutdown (Exit Delay):</strong> DSP cuts out instantly (0ms) &rarr; Amplifiers power down &rarr; Mixers cut &rarr; Main inverters cut last (3000ms).</li>
+          <li><strong>Soft-Start Startup (Entry Delay):</strong> Inverter &amp; TV turn ON first (0.0s) &rarr; Mixer &amp; Crossover (0.5s) &rarr; DSP wakes up cleanly (3.0s) &rarr; Heavy Sub &amp; Vocal Amps turn on last (4.0s).</li>
+          <li><strong>Safe FIFO Shutdown (Exit Delay):</strong> DSP cuts out instantly (0.0s) &rarr; Amplifiers power down &rarr; Mixers cut &rarr; Main inverters cut last (3.0s).</li>
           <li><strong>Visual Channel Badges:</strong> Solid Box = ON, Outlined + Center Dots = Delay Counting Down (Pending), Outlined = OFF.</li>
         </ul>
       </div>
@@ -2295,38 +2309,57 @@
         if (!emgSelect) return;
         const currentSelVal = emgSelect.value;
         emgSelect.innerHTML = "";
-        // For Action 2, add a "None / Same as Action 1" option
+        
+        // For Action 2, add a "None / Disabled" option
         if (emgSelect.id === "dashboard-emg-mode2") {
           const noneOpt = document.createElement("option");
           noneOpt.value = "0";
-          noneOpt.textContent = "— None (Same as Action 1) —";
+          noneOpt.textContent = "— None / Disabled (Action 1 Only) —";
           emgSelect.appendChild(noneOpt);
         }
-        Object.keys(rawModes).forEach(modeIdx => {
-          // Skip mode 0 (standby) for the Action 2 list since None already covers it
-          if (emgSelect.id === "dashboard-emg-mode2" && parseInt(modeIdx) === 0) return;
+
+        const minsVal = Math.floor(parseInt(document.getElementById("autoInterval").value) / 60) || 2;
+
+        Object.keys(rawModes).forEach(key => {
+          const modeIdx = parseInt(key);
+          // Skip mode 0 for Action 2 since "None" already uses value 0
+          if (emgSelect.id === "dashboard-emg-mode2" && modeIdx === 0) return;
+
           const opt = document.createElement("option");
           opt.value = modeIdx;
+          
           let label = rawModes[modeIdx];
-          if (modeIdx >= 1 && modeIdx <= 8) {
-            const chVal = document.getElementById(`ch${modeIdx}`).value || `CH ${modeIdx}`;
-            label = `Auto (${chVal})`;
+          if (modeIdx === 0) {
+            label = "STANDBY (ALL OFF)";
+          } else if (modeIdx >= 1 && modeIdx <= 8) {
+            const chVal = (document.getElementById(`ch${modeIdx}`) ? document.getElementById(`ch${modeIdx}`).value.trim() : "") || `CH ${modeIdx}`;
+            label = `AUTO ${modeIdx}: ${chVal.toUpperCase()}`;
+          } else if (modeIdx === 9) {
+            label = "AUTO ALL ON";
+          } else if (modeIdx === 10) {
+            label = `ALL CH ${minsVal} MIN EACH`;
           } else if (modeIdx >= 11 && modeIdx <= 18) {
-            const chVal = document.getElementById(`ch${modeIdx - 10}`).value || `CH ${modeIdx - 10}`;
-            label = `Manual (${chVal})`;
+            const chVal = (document.getElementById(`ch${modeIdx - 10}`) ? document.getElementById(`ch${modeIdx - 10}`).value.trim() : "") || `CH ${modeIdx - 10}`;
+            label = `MANUAL ${modeIdx - 10}: ${chVal.toUpperCase()}`;
+          } else if (modeIdx === 19) {
+            label = "MANUAL ALL ON";
           } else if (modeIdx >= 20 && modeIdx <= 24) {
             const effNameEl = document.getElementById(`effName${modeIdx - 19}`);
             const customEffName = effNameEl ? effNameEl.value.trim() : "";
-            label = customEffName || `Effect ${modeIdx - 19}`;
+            label = (customEffName || `EFFECT ${modeIdx - 19}`).toUpperCase();
           } else if (modeIdx >= 25 && modeIdx <= 29) {
             const grpNameEl = document.getElementById(`grpName${modeIdx - 24}`);
             const customGrpName = grpNameEl ? grpNameEl.value.trim() : "";
-            label = customGrpName || `Group ${modeIdx - 24}`;
+            label = (customGrpName || `GROUP ${modeIdx - 24}`).toUpperCase();
           }
-          opt.textContent = `${modeIdx === 0 ? "MODE 0: " : `MODE ${modeIdx}: `}${label.toUpperCase()}`;
+
+          opt.textContent = `MODE ${modeIdx}: ${label}`;
           emgSelect.appendChild(opt);
         });
-        if (currentSelVal) emgSelect.value = currentSelVal;
+
+        if (currentSelVal !== "" && currentSelVal !== null && currentSelVal !== undefined) {
+          emgSelect.value = currentSelVal;
+        }
       });
     }
 
@@ -2360,6 +2393,15 @@
       document.getElementById("longPressVal").textContent = `${val}s`;
     });
 
+    document.getElementById("modeDelay").addEventListener("input", (e) => {
+      const val = parseInt(e.target.value);
+      if (val === 0) {
+        document.getElementById("modeDelayVal").textContent = "0.0s (Instant)";
+      } else {
+        document.getElementById("modeDelayVal").textContent = `${(val / 1000).toFixed(1)}s`;
+      }
+    });
+
     // --- SEQUENCER & POWER GROUPS UI GENERATION ---
     function initSequencerUI() {
       // 1. Generate Per-Relay Delay Table Rows
@@ -2378,8 +2420,8 @@
             </td>
             <td style="padding: 10px 12px;">
               <div style="display: flex; align-items: center; gap: 6px;">
-                <input type="number" id="rlyEntry${i}" value="0" min="0" max="30000" step="100" style="width: 90px; padding: 6px 10px; font-size: 0.84rem;">
-                <span style="font-size: 0.78rem; color: var(--text-muted);">ms</span>
+                <input type="number" id="rlyEntry${i}" value="0.0" min="0" max="30.0" step="0.1" style="width: 80px; padding: 6px 10px; font-size: 0.84rem;">
+                <span style="font-size: 0.78rem; color: var(--text-muted);">sec</span>
               </div>
             </td>
             <td style="padding: 10px 12px;">
@@ -2390,8 +2432,8 @@
             </td>
             <td style="padding: 10px 12px;">
               <div style="display: flex; align-items: center; gap: 6px;">
-                <input type="number" id="rlyExit${i}" value="0" min="0" max="30000" step="100" style="width: 90px; padding: 6px 10px; font-size: 0.84rem;">
-                <span style="font-size: 0.78rem; color: var(--text-muted);">ms</span>
+                <input type="number" id="rlyExit${i}" value="0.0" min="0" max="30.0" step="0.1" style="width: 80px; padding: 6px 10px; font-size: 0.84rem;">
+                <span style="font-size: 0.78rem; color: var(--text-muted);">sec</span>
               </div>
             </td>
             <td style="padding: 10px 12px;">
@@ -2507,53 +2549,53 @@
 
       fillSampleAudioLabels();
 
-      // 2. Delays & Toggles (Anti-Pop Tuning)
-      // CH1 (DSP): Entry 3000ms (ON) [Avoids startup crack], Exit 0ms (OFF) [First to cut!]
-      document.getElementById("rlyEntry1").value = 3000;
+      // 2. Delays & Toggles (Anti-Pop Tuning in Seconds)
+      // CH1 (DSP): Entry 3.0s (ON) [Avoids startup crack], Exit 0.0s (OFF) [First to cut!]
+      document.getElementById("rlyEntry1").value = "3.0";
       document.getElementById("rlyEntOn1").checked = true;
-      document.getElementById("rlyExit1").value = 0;
+      document.getElementById("rlyExit1").value = "0.0";
       document.getElementById("rlyExtOn1").checked = false;
 
-      // CH2 (Subwoofer): Entry 4000ms (ON) [Powers on after DSP is stable], Exit 500ms (ON)
-      document.getElementById("rlyEntry2").value = 4000;
+      // CH2 (Subwoofer): Entry 4.0s (ON) [Powers on after DSP is stable], Exit 0.5s (ON)
+      document.getElementById("rlyEntry2").value = "4.0";
       document.getElementById("rlyEntOn2").checked = true;
-      document.getElementById("rlyExit2").value = 500;
+      document.getElementById("rlyExit2").value = "0.5";
       document.getElementById("rlyExtOn2").checked = true;
 
-      // CH3 (Main Amps): Entry 4000ms (ON), Exit 500ms (ON)
-      document.getElementById("rlyEntry3").value = 4000;
+      // CH3 (Main Amps): Entry 4.0s (ON), Exit 0.5s (ON)
+      document.getElementById("rlyEntry3").value = "4.0";
       document.getElementById("rlyEntOn3").checked = true;
-      document.getElementById("rlyExit3").value = 500;
+      document.getElementById("rlyExit3").value = "0.5";
       document.getElementById("rlyExtOn3").checked = true;
 
-      // CH4 (Audio Mixer): Entry 500ms (ON), Exit 2000ms (ON)
-      document.getElementById("rlyEntry4").value = 500;
+      // CH4 (Audio Mixer): Entry 0.5s (ON), Exit 2.0s (ON)
+      document.getElementById("rlyEntry4").value = "0.5";
       document.getElementById("rlyEntOn4").checked = true;
-      document.getElementById("rlyExit4").value = 2000;
+      document.getElementById("rlyExit4").value = "2.0";
       document.getElementById("rlyExtOn4").checked = true;
 
-      // CH5 (Crossover): Entry 500ms (ON), Exit 2000ms (ON)
-      document.getElementById("rlyEntry5").value = 500;
+      // CH5 (Crossover): Entry 0.5s (ON), Exit 2.0s (ON)
+      document.getElementById("rlyEntry5").value = "0.5";
       document.getElementById("rlyEntOn5").checked = true;
-      document.getElementById("rlyExit5").value = 2000;
+      document.getElementById("rlyExit5").value = "2.0";
       document.getElementById("rlyExtOn5").checked = true;
 
-      // CH6 (TV Display): Entry 0ms (OFF), Exit 3000ms (ON)
-      document.getElementById("rlyEntry6").value = 0;
+      // CH6 (TV Display): Entry 0.0s (OFF), Exit 3.0s (ON)
+      document.getElementById("rlyEntry6").value = "0.0";
       document.getElementById("rlyEntOn6").checked = false;
-      document.getElementById("rlyExit6").value = 3000;
+      document.getElementById("rlyExit6").value = "3.0";
       document.getElementById("rlyExtOn6").checked = true;
 
-      // CH7 (Inverter): Entry 0ms (OFF), Exit 3000ms (ON)
-      document.getElementById("rlyEntry7").value = 0;
+      // CH7 (Inverter): Entry 0.0s (OFF), Exit 3.0s (ON)
+      document.getElementById("rlyEntry7").value = "0.0";
       document.getElementById("rlyEntOn7").checked = false;
-      document.getElementById("rlyExit7").value = 3000;
+      document.getElementById("rlyExit7").value = "3.0";
       document.getElementById("rlyExtOn7").checked = true;
 
-      // CH8 (Horns/Aux): Entry 0ms, Exit 0ms
-      document.getElementById("rlyEntry8").value = 0;
+      // CH8 (Horns/Aux): Entry 0.0s, Exit 0.0s
+      document.getElementById("rlyEntry8").value = "0.0";
       document.getElementById("rlyEntOn8").checked = false;
-      document.getElementById("rlyExit8").value = 0;
+      document.getElementById("rlyExit8").value = "0.0";
       document.getElementById("rlyExtOn8").checked = false;
 
       // 3. Power Groups
@@ -2598,6 +2640,7 @@
       configText += `menuFont=${document.getElementById("menuFont").value}\n`;
       configText += `autoInterval=${(parseInt(document.getElementById("autoInterval").value) || 120) * 1000}\n`;
       configText += `longPress=${document.getElementById("longPress").value}\n`;
+      configText += `modeDelay=${document.getElementById("modeDelay").value}\n`;
       configText += `screensaverDelay=${(parseInt(document.getElementById("screensaverDelay").value) || 10) * 60000}\n\n`;
 
       configText += `[CHANNELS]\n`;
@@ -2612,8 +2655,8 @@
 
       configText += `[SEQUENCER_DELAYS]\n`;
       for (let i = 1; i <= 8; i++) {
-        const entVal = parseInt(document.getElementById(`rlyEntry${i}`) ? document.getElementById(`rlyEntry${i}`).value : 0) || 0;
-        const extVal = parseInt(document.getElementById(`rlyExit${i}`) ? document.getElementById(`rlyExit${i}`).value : 0) || 0;
+        const entVal = (parseFloat(document.getElementById(`rlyEntry${i}`) ? document.getElementById(`rlyEntry${i}`).value : 0) || 0).toFixed(1);
+        const extVal = (parseFloat(document.getElementById(`rlyExit${i}`) ? document.getElementById(`rlyExit${i}`).value : 0) || 0).toFixed(1);
         const entOn = (document.getElementById(`rlyEntOn${i}`) && document.getElementById(`rlyEntOn${i}`).checked) ? 1 : 0;
         const extOn = (document.getElementById(`rlyExtOn${i}`) && document.getElementById(`rlyExtOn${i}`).checked) ? 1 : 0;
         configText += `rlyEntry${i}=${entVal}\n`;
@@ -2640,7 +2683,7 @@
       for (let i = 1; i <= 5; i++) {
         configText += `effName${i}=${document.getElementById(`effName${i}`).value.trim() || `EFFECT ${i}`}\n`;
         configText += `effSeq${i}=${document.getElementById(`effSeq${i}`).value.trim() || "1,2,3,4"}\n`;
-        configText += `effTime${i}=${document.getElementById(`effTime${i}`).value || 500}\n`;
+        configText += `effTime${i}=${(parseFloat(document.getElementById(`effTime${i}`).value) || 0.5).toFixed(2)}\n`;
         configText += `effLoop${i}=${document.getElementById(`effLoop${i}`).checked ? 1 : 0}\n`;
       }
       configText += `\n`;
@@ -2726,9 +2769,18 @@
       }
 
       if (kvMap.longPress !== undefined) {
-        const lp = parseInt(kvMap.longPress) || 1000;
+        let lp = parseFloat(kvMap.longPress);
+        if (lp <= 10) lp = Math.round(lp * 1000);
         document.getElementById("longPress").value = lp;
         document.getElementById("longPressVal").innerText = `${(lp / 1000).toFixed(1)}s`;
+      }
+
+      const mDelayVal = kvMap.modeDelay !== undefined ? kvMap.modeDelay : kvMap.longPressAll;
+      if (mDelayVal !== undefined) {
+        let md = parseFloat(mDelayVal);
+        if (md <= 10) md = Math.round(md * 1000);
+        document.getElementById("modeDelay").value = md;
+        document.getElementById("modeDelayVal").innerText = md === 0 ? "0.0s (Instant)" : `${(md / 1000).toFixed(1)}s`;
       }
 
       if (kvMap.screensaverDelay !== undefined) {
@@ -2744,18 +2796,29 @@
       for (let i = 1; i <= 5; i++) {
         if (kvMap[`effName${i}`] !== undefined) document.getElementById(`effName${i}`).value = kvMap[`effName${i}`];
         if (kvMap[`effSeq${i}`] !== undefined) document.getElementById(`effSeq${i}`).value = kvMap[`effSeq${i}`];
-        if (kvMap[`effTime${i}`] !== undefined) document.getElementById(`effTime${i}`).value = kvMap[`effTime${i}`];
+        if (kvMap[`effTime${i}`] !== undefined) {
+          let tVal = parseFloat(kvMap[`effTime${i}`]);
+          if (tVal >= 20) tVal = (tVal / 1000).toFixed(2);
+          else tVal = tVal.toFixed(2);
+          document.getElementById(`effTime${i}`).value = tVal;
+        }
         if (kvMap[`effLoop${i}`] !== undefined) document.getElementById(`effLoop${i}`).checked = (kvMap[`effLoop${i}`] === "1" || kvMap[`effLoop${i}`] === "true");
       }
 
       for (let i = 1; i <= 8; i++) {
         if (kvMap[`rlyEntry${i}`] !== undefined) {
+          let val = parseFloat(kvMap[`rlyEntry${i}`]);
+          if (val > 30) val = (val / 1000).toFixed(1);
+          else val = val.toFixed(1);
           const el = document.getElementById(`rlyEntry${i}`);
-          if (el) el.value = kvMap[`rlyEntry${i}`];
+          if (el) el.value = val;
         }
         if (kvMap[`rlyExit${i}`] !== undefined) {
+          let val = parseFloat(kvMap[`rlyExit${i}`]);
+          if (val > 30) val = (val / 1000).toFixed(1);
+          else val = val.toFixed(1);
           const el = document.getElementById(`rlyExit${i}`);
-          if (el) el.value = kvMap[`rlyExit${i}`];
+          if (el) el.value = val;
         }
         if (kvMap[`rlyEntOn${i}`] !== undefined) {
           const el = document.getElementById(`rlyEntOn${i}`);
@@ -2836,6 +2899,7 @@
     // Initialize UI tables and list
     initSequencerUI();
     renderOrderList();
+    populateEmergencyModes();
 
     function getSerialApi() {
       if ('serial' in navigator && navigator.serial) {
@@ -3032,9 +3096,18 @@
           document.getElementById("autoInterval").value = secInterval;
           document.getElementById("autoInterval").dispatchEvent(new Event("input"));
 
-          // Set Longpress slider
-          document.getElementById("longPress").value = cfg.longPress;
-          document.getElementById("longPress").dispatchEvent(new Event("input"));
+          // Set Longpress Knob slider
+          if (cfg.longPress !== undefined) {
+            document.getElementById("longPress").value = cfg.longPress;
+            document.getElementById("longPress").dispatchEvent(new Event("input"));
+          }
+
+          // Set Dial Turn Activation Delay slider
+          const incomingModeDelay = cfg.modeDelay !== undefined ? cfg.modeDelay : cfg.longPressAll;
+          if (incomingModeDelay !== undefined) {
+            document.getElementById("modeDelay").value = incomingModeDelay;
+            document.getElementById("modeDelay").dispatchEvent(new Event("input"));
+          }
 
           // Set Screensaver Delay slider
           if (cfg.screensaverDelay !== undefined) {
@@ -3052,22 +3125,22 @@
               document.getElementById(`effSeq${i}`).value = cfg[`effSeq${i}`];
             }
             if (cfg[`effTime${i}`] !== undefined) {
-              document.getElementById(`effTime${i}`).value = cfg[`effTime${i}`];
+              document.getElementById(`effTime${i}`).value = (cfg[`effTime${i}`] / 1000).toFixed(2);
             }
             if (cfg[`effLoop${i}`] !== undefined) {
               document.getElementById(`effLoop${i}`).checked = (cfg[`effLoop${i}`] === 1);
             }
           }
 
-          // Set 8 Per-Relay Power Sequencer Delays
+          // Set 8 Per-Relay Power Sequencer Delays (convert ms from firmware to sec for display)
           for (let i = 1; i <= 8; i++) {
             if (cfg[`rlyEntry${i}`] !== undefined) {
               const el = document.getElementById(`rlyEntry${i}`);
-              if (el) el.value = cfg[`rlyEntry${i}`];
+              if (el) el.value = (cfg[`rlyEntry${i}`] / 1000).toFixed(1);
             }
             if (cfg[`rlyExit${i}`] !== undefined) {
               const el = document.getElementById(`rlyExit${i}`);
-              if (el) el.value = cfg[`rlyExit${i}`];
+              if (el) el.value = (cfg[`rlyExit${i}`] / 1000).toFixed(1);
             }
             if (cfg[`rlyEntOn${i}`] !== undefined) {
               const el = document.getElementById(`rlyEntOn${i}`);
@@ -3363,6 +3436,7 @@
       const dispTypeVal = document.getElementById("admin-display-type").value;
       const intervalVal = parseInt(document.getElementById("autoInterval").value) * 1000;
       const longpressVal = parseInt(document.getElementById("longPress").value);
+      const modeDelayVal = parseInt(document.getElementById("modeDelay").value) || 0;
 
       const ssMins = Math.max(1, parseInt(document.getElementById("screensaverDelay").value) || 10);
       const ssDelayVal = ssMins * 60000;
@@ -3380,11 +3454,11 @@
       const effSeq4 = document.getElementById("effSeq4").value.trim() || "2,4,6,8";
       const effSeq5 = document.getElementById("effSeq5").value.trim() || "1,2,3,4,5,6,7,8";
       
-      const effTime1 = parseInt(document.getElementById("effTime1").value) || 500;
-      const effTime2 = parseInt(document.getElementById("effTime2").value) || 500;
-      const effTime3 = parseInt(document.getElementById("effTime3").value) || 500;
-      const effTime4 = parseInt(document.getElementById("effTime4").value) || 500;
-      const effTime5 = parseInt(document.getElementById("effTime5").value) || 500;
+      const effTime1 = Math.round((parseFloat(document.getElementById("effTime1").value) || 0.5) * 1000);
+      const effTime2 = Math.round((parseFloat(document.getElementById("effTime2").value) || 0.5) * 1000);
+      const effTime3 = Math.round((parseFloat(document.getElementById("effTime3").value) || 0.5) * 1000);
+      const effTime4 = Math.round((parseFloat(document.getElementById("effTime4").value) || 0.5) * 1000);
+      const effTime5 = Math.round((parseFloat(document.getElementById("effTime5").value) || 0.5) * 1000);
       
       const effLoop1 = document.getElementById("effLoop1").checked ? 1 : 0;
       const effLoop2 = document.getElementById("effLoop2").checked ? 1 : 0;
@@ -3392,11 +3466,13 @@
       const effLoop4 = document.getElementById("effLoop4").checked ? 1 : 0;
       const effLoop5 = document.getElementById("effLoop5").checked ? 1 : 0;
 
-      // Power Sequencer Delays & Toggles
+      // Power Sequencer Delays & Toggles (Convert decimal sec to ms for firmware)
       let seqParams = "";
       for (let i = 1; i <= 8; i++) {
-        const entVal = parseInt(document.getElementById(`rlyEntry${i}`) ? document.getElementById(`rlyEntry${i}`).value : 0) || 0;
-        const extVal = parseInt(document.getElementById(`rlyExit${i}`) ? document.getElementById(`rlyExit${i}`).value : 0) || 0;
+        const entSec = parseFloat(document.getElementById(`rlyEntry${i}`) ? document.getElementById(`rlyEntry${i}`).value : 0) || 0;
+        const extSec = parseFloat(document.getElementById(`rlyExit${i}`) ? document.getElementById(`rlyExit${i}`).value : 0) || 0;
+        const entVal = Math.round(entSec * 1000);
+        const extVal = Math.round(extSec * 1000);
         const entOn = (document.getElementById(`rlyEntOn${i}`) && document.getElementById(`rlyEntOn${i}`).checked) ? 1 : 0;
         const extOn = (document.getElementById(`rlyExtOn${i}`) && document.getElementById(`rlyExtOn${i}`).checked) ? 1 : 0;
         seqParams += `;rlyEntry${i}=${entVal};rlyExit${i}=${extVal};rlyEntOn${i}=${entOn};rlyExtOn${i}=${extOn}`;
@@ -3418,7 +3494,7 @@
       const emgModeVal = document.getElementById("dashboard-emg-mode") ? document.getElementById("dashboard-emg-mode").value : (document.getElementById("admin-emg-mode") ? document.getElementById("admin-emg-mode").value : 0);
       const emgMode2Val = document.getElementById("dashboard-emg-mode2") ? document.getElementById("dashboard-emg-mode2").value : 0;
 
-      const packet = `SET_CFG;bootText=${bootTextVal};ch1=${ch1Val};ch2=${ch2Val};ch3=${ch3Val};ch4=${ch4Val};ch5=${ch5Val};ch6=${ch6Val};ch7=${ch7Val};ch8=${ch8Val};style=${styleVal};font=${fontVal};bootFont=${bootFontVal};dispType=${dispTypeVal};interval=${intervalVal};longpress=${longpressVal};ssDelay=${ssDelayVal};buzzer=1;effName1=${effName1};effName2=${effName2};effName3=${effName3};effName4=${effName4};effName5=${effName5};effSeq1=${effSeq1};effSeq2=${effSeq2};effSeq3=${effSeq3};effSeq4=${effSeq4};effSeq5=${effSeq5};effTime1=${effTime1};effTime2=${effTime2};effTime3=${effTime3};effTime4=${effTime4};effTime5=${effTime5};effLoop1=${effLoop1};effLoop2=${effLoop2};effLoop3=${effLoop3};effLoop4=${effLoop4};effLoop5=${effLoop5}${seqParams}${grpParams};emgMode=${emgModeVal};emgMode2=${emgMode2Val};order=${orderStr};pass=${deviceAdminPass}`;
+      const packet = `SET_CFG;bootText=${bootTextVal};ch1=${ch1Val};ch2=${ch2Val};ch3=${ch3Val};ch4=${ch4Val};ch5=${ch5Val};ch6=${ch6Val};ch7=${ch7Val};ch8=${ch8Val};style=${styleVal};font=${fontVal};bootFont=${bootFontVal};dispType=${dispTypeVal};interval=${intervalVal};longpress=${longpressVal};modeDelay=${modeDelayVal};ssDelay=${ssDelayVal};buzzer=1;effName1=${effName1};effName2=${effName2};effName3=${effName3};effName4=${effName4};effName5=${effName5};effSeq1=${effSeq1};effSeq2=${effSeq2};effSeq3=${effSeq3};effSeq4=${effSeq4};effSeq5=${effSeq5};effTime1=${effTime1};effTime2=${effTime2};effTime3=${effTime3};effTime4=${effTime4};effTime5=${effTime5};effLoop1=${effLoop1};effLoop2=${effLoop2};effLoop3=${effLoop3};effLoop4=${effLoop4};effLoop5=${effLoop5}${seqParams}${grpParams};emgMode=${emgModeVal};emgMode2=${emgMode2Val};order=${orderStr};pass=${deviceAdminPass}`;
 
       writeSerial(packet);
     };
