@@ -1,4 +1,4 @@
-# Osprey Controller — Operator Guide
+# Osprey Controller — Operator & Installer Guide
 
 Welcome to the **Osprey Controller (8-Channel Smart Audio Sequencer & Power Manager)**! This guide is written for operators, sound engineers, and installers. It explains how to operate the device using the tactile rotary encoder dial, high-contrast OLED display, and Web Controller dashboard.
 
@@ -15,7 +15,7 @@ The Osprey Controller features a **tactile rotary encoder dial** with an integra
 - **Short Press Dial**:
   - **While Scrolling**: Immediately settles and activates the highlighted mode without waiting for the timer.
   - **In Manual Channel Modes (MANUAL CH 1–8, MANUAL ALL ON)**: Toggles the highlighted relay channel **ON** / **OFF**.
-  - **In Power Groups (Modes 25–29)**: Activates or deactivates the power group with individual soft-start and shutdown delays.
+  - **In Power Groups (Modes 25–34)**: Activates or deactivates the power group with individual soft-start and shutdown delays.
   - **In Auto Modes**: Cancels the active auto timer and returns to Standby OFF.
 - **Long Press Knob**:
   - Hold the rotary knob down (0.5s to 5.0s, configurable) to toggle between **STANDBY (Safe FIFO All-OFF)** and **MANUAL ALL ON**.
