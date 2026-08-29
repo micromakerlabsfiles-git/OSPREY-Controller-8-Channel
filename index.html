@@ -1567,9 +1567,9 @@
         </table>
       </div>
 
-      <!-- Power Groups Editor (Modes 25–29) -->
+      <!-- Power Groups Editor (Modes 25–34) -->
       <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
-        2. Power Groups (Preset Modes 25–29 with Sequencer Delays)
+        2. Power Groups (Preset Modes 25–34 with Sequencer Delays)
       </h3>
 
       <div style="display: flex; flex-direction: column; gap: 1rem;" id="power-groups-container">
@@ -1858,7 +1858,12 @@
       26: "Power Group 2",
       27: "Power Group 3",
       28: "Power Group 4",
-      29: "Power Group 5"
+      29: "Power Group 5",
+      30: "Power Group 6",
+      31: "Power Group 7",
+      32: "Power Group 8",
+      33: "Power Group 9",
+      34: "Power Group 10"
     };
 
     // Active order representation (starts with default 25 modes)
@@ -2016,7 +2021,7 @@
           const effNameEl = document.getElementById(`effName${modeIdx - 19}`);
           const customEffName = effNameEl ? effNameEl.value.trim() : "";
           label = customEffName || `Effect ${modeIdx - 19}`;
-        } else if (modeIdx >= 25 && modeIdx <= 29) {
+        } else if (modeIdx >= 25 && modeIdx <= 34) {
           const grpNameEl = document.getElementById(`grpName${modeIdx - 24}`);
           const customGrpName = grpNameEl ? grpNameEl.value.trim() : "";
           label = customGrpName || `Group ${modeIdx - 24}`;
@@ -2123,7 +2128,7 @@
           const effNameEl = document.getElementById(`effName${modeIdx - 19}`);
           const customEffName = effNameEl ? effNameEl.value.trim() : "";
           label = customEffName || `Effect ${modeIdx - 19}`;
-        } else if (modeIdx >= 25 && modeIdx <= 29) {
+        } else if (modeIdx >= 25 && modeIdx <= 34) {
           const grpNameEl = document.getElementById(`grpName${modeIdx - 24}`);
           const customGrpName = grpNameEl ? grpNameEl.value.trim() : "";
           label = customGrpName || `Group ${modeIdx - 24}`;
@@ -2182,7 +2187,7 @@
             const effNameEl = document.getElementById(`effName${modeIdx - 19}`);
             const customEffName = effNameEl ? effNameEl.value.trim() : "";
             label = (customEffName || `EFFECT ${modeIdx - 19}`).toUpperCase();
-          } else if (modeIdx >= 25 && modeIdx <= 29) {
+          } else if (modeIdx >= 25 && modeIdx <= 34) {
             const grpNameEl = document.getElementById(`grpName${modeIdx - 24}`);
             const customGrpName = grpNameEl ? grpNameEl.value.trim() : "";
             label = (customGrpName || `GROUP ${modeIdx - 24}`).toUpperCase();
@@ -2282,11 +2287,11 @@
         }
       }
 
-      // 2. Generate Power Groups Cards (Modes 25–29)
+      // 2. Generate Power Groups Cards (Modes 25–34)
       const groupsContainer = document.getElementById("power-groups-container");
       if (groupsContainer) {
         groupsContainer.innerHTML = "";
-        for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 10; i++) {
           const grpCard = document.createElement("div");
           grpCard.style.cssText = "background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.2rem;";
           
@@ -2332,7 +2337,7 @@
         const val = (document.getElementById(`ch${i}`) ? document.getElementById(`ch${i}`).value : "") || `CH ${i}`;
         const lbl = document.getElementById(`seq-ch-label-${i}`);
         if (lbl) lbl.textContent = val.toUpperCase();
-        for (let g = 1; g <= 5; g++) {
+        for (let g = 1; g <= 10; g++) {
           const gLbl = document.getElementById(`grp${g}_ch${i}_label`);
           if (gLbl) gLbl.textContent = val.toUpperCase();
         }
@@ -2449,6 +2454,21 @@
       document.getElementById("grpName5").value = "SUBWOOFER ONLY";
       [1,2,4,5,7].forEach(ch => { document.getElementById(`grp5_ch${ch}`).checked = true; });
 
+      document.getElementById("grpName6").value = "AMPS ONLY";
+      [2,3].forEach(ch => { const el = document.getElementById(`grp6_ch${ch}`); if (el) el.checked = true; });
+
+      document.getElementById("grpName7").value = "MIXER & DSP";
+      [1,4,5].forEach(ch => { const el = document.getElementById(`grp7_ch${ch}`); if (el) el.checked = true; });
+
+      document.getElementById("grpName8").value = "TV & INVERTER";
+      [6,7].forEach(ch => { const el = document.getElementById(`grp8_ch${ch}`); if (el) el.checked = true; });
+
+      document.getElementById("grpName9").value = "AUX & HORNS";
+      [8].forEach(ch => { const el = document.getElementById(`grp9_ch${ch}`); if (el) el.checked = true; });
+
+      document.getElementById("grpName10").value = "NIGHT MODE";
+      [1,6,7].forEach(ch => { const el = document.getElementById(`grp10_ch${ch}`); if (el) el.checked = true; });
+
       updateSequencerChannelLabels();
       renderOrderList();
       populateEmergencyModes();
@@ -2502,7 +2522,7 @@
       configText += `\n`;
 
       configText += `[POWER_GROUPS]\n`;
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 10; i++) {
         const gName = (document.getElementById(`grpName${i}`) ? document.getElementById(`grpName${i}`).value.trim() : "") || `GROUP ${i}`;
         const activeChs = [];
         for (let ch = 1; ch <= 8; ch++) {
@@ -2665,7 +2685,7 @@
         }
       }
 
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 10; i++) {
         if (kvMap[`grpName${i}`] !== undefined) {
           const el = document.getElementById(`grpName${i}`);
           if (el) el.value = kvMap[`grpName${i}`];
@@ -2989,8 +3009,8 @@
             }
           }
 
-          // Set 5 Power Groups
-          for (let i = 1; i <= 5; i++) {
+          // Set 10 Power Groups
+          for (let i = 1; i <= 10; i++) {
             if (cfg[`grpName${i}`] !== undefined) {
               const el = document.getElementById(`grpName${i}`);
               if (el) el.value = cfg[`grpName${i}`];
@@ -3227,9 +3247,9 @@
         seqParams += `;rlyEntry${i}=${entVal};rlyExit${i}=${extVal};rlyEntOn${i}=${entOn};rlyExtOn${i}=${extOn}`;
       }
 
-      // Power Groups
+      // Power Groups (10 Groups)
       let grpParams = "";
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 10; i++) {
         const gName = getVal(`grpName${i}`, `GROUP ${i}`);
         const activeChs = [];
         for (let ch = 1; ch <= 8; ch++) {
