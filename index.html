@@ -11,6 +11,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
+  <!-- ESP Web Tools: registers <esp-web-install-button> custom element -->
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
 
 
 
@@ -1054,8 +1056,8 @@
         <div style="background: var(--btn-sec-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 1rem; text-align: center;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <div style="text-align: left;">
-              <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-main);">ESP32 Firmware (SH110X)</div>
-              <div style="font-size: 0.78rem; color: var(--text-muted);">1.3" OLED • 8-CH Sequencer • v1.0.0</div>
+              <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-main);">ESP32 Firmware (SH110X / SSD1306)</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">1.3" OLED • 8-CH Sequencer • v1.1.0</div>
             </div>
             <span style="background: rgba(0, 122, 138, 0.15); color: var(--teal); font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">READY</span>
           </div>
@@ -1281,6 +1283,24 @@
           <option value="1">Monospace (Classic Text)</option>
           <option value="2">Profont (Retro High-Tech)</option>
         </select>
+      </div>
+
+      <div class="form-group">
+        <label for="displayType">OLED DISPLAY CONTROLLER</label>
+        <select id="displayType" class="form-select">
+          <option value="0">SH1106 (1.3" OLED — Default)</option>
+          <option value="1">SSD1306 (0.96" OLED)</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: uppercase; font-size: 0.82rem; font-weight: 600;">
+          <input type="checkbox" id="buzzerEnabled" style="width: 18px; height: 18px; accent-color: var(--accent);">
+          ENABLE BUZZER AUDIO FEEDBACK
+        </label>
+        <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 2px;">
+          Uncheck if physical buzzer is removed to silence all tones.
+        </span>
       </div>
 
       <div class="range-container">
@@ -1787,7 +1807,25 @@
     let inputBuffer = "";
     let keepReading = true;
     let readLoopPromise = null;
-    let deviceAdminPass = "";
+    let deviceBuzzerEnabled = 1; // Mirror of firmware buzzerEnabled; default ON
+
+    // Releases the Web Serial port so that esp-web-tools can claim it for flashing.
+    // Called when the user clicks the Flash button on the connect screen.
+    async function prepareFlasherDisconnect() {
+      if (port) {
+        try {
+          keepReading = false;
+          if (reader) { try { await reader.cancel(); } catch(_) {} reader = null; }
+          if (readLoopPromise) { try { await readLoopPromise; } catch(_) {} readLoopPromise = null; }
+          await port.close();
+        } catch(e) {
+          // Ignore close errors — port may already be released
+        }
+        port = null;
+        updateConnectionUI(false);
+        logMessage("Serial port released for firmware flash. Connect again after flashing completes.", "sys");
+      }
+    }
 
     // Core modes definition (indexes 0 to 29)
     const rawModes = {
@@ -2314,7 +2352,7 @@
         pill.style.color = "var(--teal)";
         pill.textContent = "CLICKING...";
       }
-      writeSerial(`TEST_RELAY;ch=${ch};state=toggle;pass=${deviceAdminPass}`);
+      writeSerial(`TEST_RELAY;ch=${ch};state=toggle`);
       logMessage(`Triggered live hardware test for Relay Channel ${ch}`, "sys");
     }
 
@@ -2324,7 +2362,7 @@
         logMessage("Cannot test relays: Serial connection not open.", "err");
         return;
       }
-      writeSerial(`TEST_ALL;state=${state};pass=${deviceAdminPass}`);
+      writeSerial(`TEST_ALL;state=${state}`);
       logMessage(`Triggered live hardware test for ALL relay channels (${state})`, "sys");
     }
 
@@ -2767,7 +2805,6 @@
 
       port = null;
       reader = null;
-      deviceAdminPass = "";
       updateConnectionUI(false);
 
       logMessage("Serial Connection closed.", "sys");
@@ -2846,23 +2883,15 @@
 
           // Set Boot Text / Controller Name
           if (cfg.bootText) {
-            document.getElementById("bootText").value = cfg.bootText;
+            const btEl = document.getElementById("bootText");
+            if (btEl) btEl.value = cfg.bootText;
             const titleEl = document.getElementById("header-device-title");
             if (titleEl) titleEl.innerText = cfg.bootText.toUpperCase();
           }
-
-          // Set Admin Pass if present
-          if (cfg.adminPass && cfg.adminPass.trim() !== "") {
-            deviceAdminPass = cfg.adminPass.trim();
+          for (let _ci = 1; _ci <= 8; _ci++) {
+            const _chEl = document.getElementById("ch" + _ci);
+            if (_chEl && cfg["ch" + _ci] !== undefined) _chEl.value = cfg["ch" + _ci];
           }
-          document.getElementById("ch1").value = cfg.ch1;
-          document.getElementById("ch2").value = cfg.ch2;
-          document.getElementById("ch3").value = cfg.ch3;
-          document.getElementById("ch4").value = cfg.ch4;
-          document.getElementById("ch5").value = cfg.ch5;
-          document.getElementById("ch6").value = cfg.ch6;
-          document.getElementById("ch7").value = cfg.ch7;
-          document.getElementById("ch8").value = cfg.ch8;
 
           // Set Style radio
           const styleRadios = document.getElementsByName("menuStyle");
@@ -2875,57 +2904,68 @@
 
           // Set Font dropdown
           if (cfg.menuFont !== undefined) {
-            document.getElementById("menuFont").value = cfg.menuFont;
+            const mfEl = document.getElementById("menuFont");
+            if (mfEl) mfEl.value = cfg.menuFont;
           }
 
           // Set Boot Font dropdown
           if (cfg.bootFont !== undefined) {
-            document.getElementById("bootFont").value = cfg.bootFont;
+            const bfEl = document.getElementById("bootFont");
+            if (bfEl) bfEl.value = cfg.bootFont;
           }
 
           // Set Display Type dropdown
           if (cfg.displayType !== undefined) {
-            document.getElementById("admin-display-type").value = cfg.displayType;
+            const dtEl = document.getElementById("displayType") || document.getElementById("admin-display-type");
+            if (dtEl) dtEl.value = cfg.displayType;
           }
 
           // Set Interval slider
-          const secInterval = Math.floor(cfg.autoInterval / 1000);
-          document.getElementById("autoInterval").value = secInterval;
-          document.getElementById("autoInterval").dispatchEvent(new Event("input"));
+          if (cfg.autoInterval !== undefined) {
+            const secInterval = Math.floor(cfg.autoInterval / 1000);
+            const aiEl = document.getElementById("autoInterval");
+            if (aiEl) { aiEl.value = secInterval; aiEl.dispatchEvent(new Event("input")); }
+          }
 
           // Set Longpress Knob slider
           if (cfg.longPress !== undefined) {
-            document.getElementById("longPress").value = cfg.longPress;
-            document.getElementById("longPress").dispatchEvent(new Event("input"));
+            const lpEl = document.getElementById("longPress");
+            if (lpEl) { lpEl.value = cfg.longPress; lpEl.dispatchEvent(new Event("input")); }
           }
 
           // Set Dial Turn Activation Delay slider
           const incomingModeDelay = cfg.modeDelay !== undefined ? cfg.modeDelay : cfg.longPressAll;
           if (incomingModeDelay !== undefined) {
-            document.getElementById("modeDelay").value = incomingModeDelay;
-            document.getElementById("modeDelay").dispatchEvent(new Event("input"));
+            const mdEl = document.getElementById("modeDelay");
+            if (mdEl) { mdEl.value = incomingModeDelay; mdEl.dispatchEvent(new Event("input")); }
           }
 
           // Set Screensaver Delay slider
           if (cfg.screensaverDelay !== undefined) {
             const ssMins = Math.round(cfg.screensaverDelay / 60000) || 10;
-            document.getElementById("screensaverDelay").value = ssMins;
-            document.getElementById("screensaverDelayVal").innerText = `${ssMins} Min`;
+            const ssEl = document.getElementById("screensaverDelay");
+            if (ssEl) ssEl.value = ssMins;
+            const ssValEl = document.getElementById("screensaverDelayVal");
+            if (ssValEl) ssValEl.innerText = `${ssMins} Min`;
           }
 
           // Set 5 Custom Effects fields
           for (let i = 1; i <= 5; i++) {
             if (cfg[`effName${i}`] !== undefined) {
-              document.getElementById(`effName${i}`).value = cfg[`effName${i}`];
+              const el = document.getElementById(`effName${i}`);
+              if (el) el.value = cfg[`effName${i}`];
             }
             if (cfg[`effSeq${i}`] !== undefined) {
-              document.getElementById(`effSeq${i}`).value = cfg[`effSeq${i}`];
+              const el = document.getElementById(`effSeq${i}`);
+              if (el) el.value = cfg[`effSeq${i}`];
             }
             if (cfg[`effTime${i}`] !== undefined) {
-              document.getElementById(`effTime${i}`).value = (cfg[`effTime${i}`] / 1000).toFixed(2);
+              const el = document.getElementById(`effTime${i}`);
+              if (el) el.value = (cfg[`effTime${i}`] / 1000).toFixed(2);
             }
             if (cfg[`effLoop${i}`] !== undefined) {
-              document.getElementById(`effLoop${i}`).checked = (cfg[`effLoop${i}`] === 1);
+              const el = document.getElementById(`effLoop${i}`);
+              if (el) el.checked = (cfg[`effLoop${i}`] === 1);
             }
           }
 
@@ -2970,6 +3010,13 @@
             currentOrder = cfg.order;
           }
 
+          // Track buzzerEnabled from firmware so Save doesn't silently reset it
+          if (cfg.buzzerEnabled !== undefined) {
+            deviceBuzzerEnabled = (cfg.buzzerEnabled === 1 || cfg.buzzerEnabled === true) ? 1 : 0;
+            const bzEl = document.getElementById("buzzerEnabled");
+            if (bzEl) bzEl.checked = (deviceBuzzerEnabled === 1);
+          }
+
           populateEmergencyModes();
 
           if (cfg.emgMode !== undefined) {
@@ -2988,22 +3035,22 @@
       } else if (line.startsWith("PINS:")) {
         try {
           const pins = JSON.parse(line.substring(5));
-          if (pins.adminPass) deviceAdminPass = pins.adminPass;
-          if (pins.ch1 !== undefined) document.getElementById("admin-pin-ch1").value = pins.ch1;
-          if (pins.ch2 !== undefined) document.getElementById("admin-pin-ch2").value = pins.ch2;
-          if (pins.ch3 !== undefined) document.getElementById("admin-pin-ch3").value = pins.ch3;
-          if (pins.ch4 !== undefined) document.getElementById("admin-pin-ch4").value = pins.ch4;
-          if (pins.ch5 !== undefined) document.getElementById("admin-pin-ch5").value = pins.ch5;
-          if (pins.ch6 !== undefined) document.getElementById("admin-pin-ch6").value = pins.ch6;
-          if (pins.ch7 !== undefined) document.getElementById("admin-pin-ch7").value = pins.ch7;
-          if (pins.ch8 !== undefined) document.getElementById("admin-pin-ch8").value = pins.ch8;
-          if (pins.clk !== undefined) document.getElementById("admin-pin-clk").value = pins.clk;
-          if (pins.dt !== undefined) document.getElementById("admin-pin-dt").value = pins.dt;
-          if (pins.sw !== undefined) document.getElementById("admin-pin-sw").value = pins.sw;
-          if (pins.emg !== undefined) document.getElementById("admin-pin-emg").value = pins.emg;
-          if (pins.sda !== undefined) document.getElementById("admin-pin-sda").value = pins.sda;
-          if (pins.scl !== undefined) document.getElementById("admin-pin-scl").value = pins.scl;
-          if (pins.dispType !== undefined) document.getElementById("admin-display-type").value = pins.dispType;
+          const _ps = (id, val) => { const e = document.getElementById(id); if (e && val !== undefined) e.value = val; };
+          _ps("admin-pin-ch1", pins.ch1);
+          _ps("admin-pin-ch2", pins.ch2);
+          _ps("admin-pin-ch3", pins.ch3);
+          _ps("admin-pin-ch4", pins.ch4);
+          _ps("admin-pin-ch5", pins.ch5);
+          _ps("admin-pin-ch6", pins.ch6);
+          _ps("admin-pin-ch7", pins.ch7);
+          _ps("admin-pin-ch8", pins.ch8);
+          _ps("admin-pin-clk", pins.clk);
+          _ps("admin-pin-dt",  pins.dt);
+          _ps("admin-pin-sw",  pins.sw);
+          _ps("admin-pin-emg", pins.emg);
+          _ps("admin-pin-sda", pins.sda);
+          _ps("admin-pin-scl", pins.scl);
+          if (pins.dispType !== undefined) _ps("admin-display-type", pins.dispType);
           populateEmergencyModes();
           if (pins.emgMode !== undefined) {
             if (document.getElementById("dashboard-emg-mode")) document.getElementById("dashboard-emg-mode").value = pins.emgMode;
@@ -3069,9 +3116,6 @@
         logMessage("Factory reset completed successfully. Device is rebooting...", "sys");
         alert("Factory reset completed successfully! The controller will now reboot. Please log in again.");
         disconnectSerial();
-      } else if (line.includes("ERR_UNAUTHORIZED")) {
-        logMessage("Action rejected: Admin authorization failed. Please enter the correct password in the Admin Settings panel to save changes.", "err");
-        alert("Action rejected: Unauthorized! Please open the Admin Settings panel in the footer and enter the correct password to authorize saving.");
       }
     }
 
@@ -3109,68 +3153,84 @@
       }
     });
 
-    document.getElementById("btn-write").onclick = () => {
-      const bootTextVal = document.getElementById("bootText").value.trim() || "OSPREY CONTROLLER";
-      const ch1Val = document.getElementById("ch1").value.trim() || "CH 1";
-      const ch2Val = document.getElementById("ch2").value.trim() || "CH 2";
-      const ch3Val = document.getElementById("ch3").value.trim() || "CH 3";
-      const ch4Val = document.getElementById("ch4").value.trim() || "CH 4";
-      const ch5Val = document.getElementById("ch5").value.trim() || "CH 5";
-      const ch6Val = document.getElementById("ch6").value.trim() || "CH 6";
-      const ch7Val = document.getElementById("ch7").value.trim() || "CH 7";
-      const ch8Val = document.getElementById("ch8").value.trim() || "CH 8";
-      const styleVal = document.querySelector('input[name="menuStyle"]:checked').value;
-      const fontVal = document.getElementById("menuFont").value;
-      const bootFontVal = document.getElementById("bootFont").value;
-      const dispTypeVal = document.getElementById("admin-display-type").value;
-      const intervalVal = parseInt(document.getElementById("autoInterval").value) * 1000;
-      const longpressVal = parseInt(document.getElementById("longPress").value);
-      const modeDelayVal = parseInt(document.getElementById("modeDelay").value) || 0;
+    async function saveAndSyncConfig() {
+      if (!port || !port.writable) {
+        logMessage("Cannot save: No serial device connected.", "err");
+        alert("Please connect to the Osprey Controller before saving.");
+        return;
+      }
 
-      const ssMins = Math.max(1, parseInt(document.getElementById("screensaverDelay").value) || 10);
+      const getVal = (id, fallback = "") => document.getElementById(id)?.value?.trim() || fallback;
+      const getNum = (id, fallback = 0) => {
+        const el = document.getElementById(id);
+        if (!el) return fallback;
+        const v = parseFloat(el.value);
+        return isNaN(v) ? fallback : v;
+      };
+      const getChecked = (id) => document.getElementById(id)?.checked ? 1 : 0;
+
+      const bootTextVal = getVal("bootText", "OSPREY CONTROLLER");
+      const ch1Val = getVal("ch1", "CH 1");
+      const ch2Val = getVal("ch2", "CH 2");
+      const ch3Val = getVal("ch3", "CH 3");
+      const ch4Val = getVal("ch4", "CH 4");
+      const ch5Val = getVal("ch5", "CH 5");
+      const ch6Val = getVal("ch6", "CH 6");
+      const ch7Val = getVal("ch7", "CH 7");
+      const ch8Val = getVal("ch8", "CH 8");
+
+      const styleVal = document.querySelector('input[name="menuStyle"]:checked')?.value || "1";
+      const fontVal = getVal("menuFont", "0");
+      const bootFontVal = getVal("bootFont", "0");
+      const dispTypeVal = getVal("displayType", getVal("admin-display-type", "0"));
+      const intervalVal = Math.max(1000, Math.round(getNum("autoInterval", 120) * 1000));
+      const longpressVal = Math.max(100, Math.round(getNum("longPress", 1000)));
+      const modeDelayVal = Math.max(0, Math.round(getNum("modeDelay", 1000)));
+
+      const ssMins = Math.max(1, Math.round(getNum("screensaverDelay", 10)));
       const ssDelayVal = ssMins * 60000;
       const orderStr = currentOrder.join(",");
 
-      const effName1 = document.getElementById("effName1").value.trim() || "EFFECT 1";
-      const effName2 = document.getElementById("effName2").value.trim() || "EFFECT 2";
-      const effName3 = document.getElementById("effName3").value.trim() || "EFFECT 3";
-      const effName4 = document.getElementById("effName4").value.trim() || "EFFECT 4";
-      const effName5 = document.getElementById("effName5").value.trim() || "EFFECT 5";
+      const buzzerVal = document.getElementById("buzzerEnabled") ? getChecked("buzzerEnabled") : deviceBuzzerEnabled;
 
-      const effSeq1 = document.getElementById("effSeq1").value.trim() || "1,2,3,4";
-      const effSeq2 = document.getElementById("effSeq2").value.trim() || "5,6,7,8";
-      const effSeq3 = document.getElementById("effSeq3").value.trim() || "1,3,5,7";
-      const effSeq4 = document.getElementById("effSeq4").value.trim() || "2,4,6,8";
-      const effSeq5 = document.getElementById("effSeq5").value.trim() || "1,2,3,4,5,6,7,8";
-      
-      const effTime1 = Math.round((parseFloat(document.getElementById("effTime1").value) || 0.5) * 1000);
-      const effTime2 = Math.round((parseFloat(document.getElementById("effTime2").value) || 0.5) * 1000);
-      const effTime3 = Math.round((parseFloat(document.getElementById("effTime3").value) || 0.5) * 1000);
-      const effTime4 = Math.round((parseFloat(document.getElementById("effTime4").value) || 0.5) * 1000);
-      const effTime5 = Math.round((parseFloat(document.getElementById("effTime5").value) || 0.5) * 1000);
-      
-      const effLoop1 = document.getElementById("effLoop1").checked ? 1 : 0;
-      const effLoop2 = document.getElementById("effLoop2").checked ? 1 : 0;
-      const effLoop3 = document.getElementById("effLoop3").checked ? 1 : 0;
-      const effLoop4 = document.getElementById("effLoop4").checked ? 1 : 0;
-      const effLoop5 = document.getElementById("effLoop5").checked ? 1 : 0;
+      const effName1 = getVal("effName1", "EFFECT 1");
+      const effName2 = getVal("effName2", "EFFECT 2");
+      const effName3 = getVal("effName3", "EFFECT 3");
+      const effName4 = getVal("effName4", "EFFECT 4");
+      const effName5 = getVal("effName5", "EFFECT 5");
+
+      const effSeq1 = getVal("effSeq1", "1,2,3,4");
+      const effSeq2 = getVal("effSeq2", "5,6,7,8");
+      const effSeq3 = getVal("effSeq3", "1,3,5,7");
+      const effSeq4 = getVal("effSeq4", "2,4,6,8");
+      const effSeq5 = getVal("effSeq5", "1,2,3,4,5,6,7,8");
+
+      const effTime1 = Math.round(getNum("effTime1", 0.5) * 1000);
+      const effTime2 = Math.round(getNum("effTime2", 0.5) * 1000);
+      const effTime3 = Math.round(getNum("effTime3", 0.5) * 1000);
+      const effTime4 = Math.round(getNum("effTime4", 0.5) * 1000);
+      const effTime5 = Math.round(getNum("effTime5", 0.5) * 1000);
+
+      const effLoop1 = getChecked("effLoop1");
+      const effLoop2 = getChecked("effLoop2");
+      const effLoop3 = getChecked("effLoop3");
+      const effLoop4 = getChecked("effLoop4");
+      const effLoop5 = getChecked("effLoop5");
 
       // Power Sequencer Delays & Toggles (Convert decimal sec to ms for firmware)
       let seqParams = "";
       for (let i = 1; i <= 8; i++) {
-        const entSec = parseFloat(document.getElementById(`rlyEntry${i}`) ? document.getElementById(`rlyEntry${i}`).value : 0) || 0;
-        const extSec = parseFloat(document.getElementById(`rlyExit${i}`) ? document.getElementById(`rlyExit${i}`).value : 0) || 0;
-        const entVal = Math.round(entSec * 1000);
-        const extVal = Math.round(extSec * 1000);
-        const entOn = (document.getElementById(`rlyEntOn${i}`) && document.getElementById(`rlyEntOn${i}`).checked) ? 1 : 0;
-        const extOn = (document.getElementById(`rlyExtOn${i}`) && document.getElementById(`rlyExtOn${i}`).checked) ? 1 : 0;
+        const entVal = Math.round(getNum(`rlyEntry${i}`, 0) * 1000);
+        const extVal = Math.round(getNum(`rlyExit${i}`, 0) * 1000);
+        const entOn  = getChecked(`rlyEntOn${i}`);
+        const extOn  = getChecked(`rlyExtOn${i}`);
         seqParams += `;rlyEntry${i}=${entVal};rlyExit${i}=${extVal};rlyEntOn${i}=${entOn};rlyExtOn${i}=${extOn}`;
       }
 
       // Power Groups
       let grpParams = "";
       for (let i = 1; i <= 5; i++) {
-        const gName = (document.getElementById(`grpName${i}`) ? document.getElementById(`grpName${i}`).value.trim() : "") || `GROUP ${i}`;
+        const gName = getVal(`grpName${i}`, `GROUP ${i}`);
         const activeChs = [];
         for (let ch = 1; ch <= 8; ch++) {
           const chBox = document.getElementById(`grp${i}_ch${ch}`);
@@ -3180,24 +3240,29 @@
         grpParams += `;grpName${i}=${gName};grpSeq${i}=${gSeq}`;
       }
 
-      const emgModeVal = document.getElementById("dashboard-emg-mode") ? document.getElementById("dashboard-emg-mode").value : (document.getElementById("admin-emg-mode") ? document.getElementById("admin-emg-mode").value : 0);
-      const emgMode2Val = document.getElementById("dashboard-emg-mode2") ? document.getElementById("dashboard-emg-mode2").value : 0;
+      const emgModeVal = getVal("dashboard-emg-mode", getVal("admin-emg-mode", "0"));
+      const emgMode2Val = getVal("dashboard-emg-mode2", "0");
 
-      const packet = `SET_CFG;bootText=${bootTextVal};ch1=${ch1Val};ch2=${ch2Val};ch3=${ch3Val};ch4=${ch4Val};ch5=${ch5Val};ch6=${ch6Val};ch7=${ch7Val};ch8=${ch8Val};style=${styleVal};font=${fontVal};bootFont=${bootFontVal};dispType=${dispTypeVal};interval=${intervalVal};longpress=${longpressVal};modeDelay=${modeDelayVal};ssDelay=${ssDelayVal};buzzer=1;effName1=${effName1};effName2=${effName2};effName3=${effName3};effName4=${effName4};effName5=${effName5};effSeq1=${effSeq1};effSeq2=${effSeq2};effSeq3=${effSeq3};effSeq4=${effSeq4};effSeq5=${effSeq5};effTime1=${effTime1};effTime2=${effTime2};effTime3=${effTime3};effTime4=${effTime4};effTime5=${effTime5};effLoop1=${effLoop1};effLoop2=${effLoop2};effLoop3=${effLoop3};effLoop4=${effLoop4};effLoop5=${effLoop5}${seqParams}${grpParams};emgMode=${emgModeVal};emgMode2=${emgMode2Val};order=${orderStr};pass=${deviceAdminPass}`;
+      const packet = `SET_CFG;bootText=${bootTextVal};ch1=${ch1Val};ch2=${ch2Val};ch3=${ch3Val};ch4=${ch4Val};ch5=${ch5Val};ch6=${ch6Val};ch7=${ch7Val};ch8=${ch8Val};style=${styleVal};font=${fontVal};bootFont=${bootFontVal};dispType=${dispTypeVal};interval=${intervalVal};longpress=${longpressVal};modeDelay=${modeDelayVal};ssDelay=${ssDelayVal};buzzer=${buzzerVal};effName1=${effName1};effName2=${effName2};effName3=${effName3};effName4=${effName4};effName5=${effName5};effSeq1=${effSeq1};effSeq2=${effSeq2};effSeq3=${effSeq3};effSeq4=${effSeq4};effSeq5=${effSeq5};effTime1=${effTime1};effTime2=${effTime2};effTime3=${effTime3};effTime4=${effTime4};effTime5=${effTime5};effLoop1=${effLoop1};effLoop2=${effLoop2};effLoop3=${effLoop3};effLoop4=${effLoop4};effLoop5=${effLoop5}${seqParams}${grpParams};emgMode=${emgModeVal};emgMode2=${emgMode2Val};order=${orderStr}`;
 
-      writeSerial(packet);
-    };
+      logMessage("Saving and syncing configuration to controller...", "sys");
+      await writeSerial(packet);
+    }
+
+    document.getElementById("btn-write").onclick = saveAndSyncConfig;
+    const btnSaveBottom = document.getElementById("btn-save-bottom");
+    if (btnSaveBottom) btnSaveBottom.onclick = saveAndSyncConfig;
 
     document.getElementById("btn-defaults").onclick = () => {
       if (confirm("Restore factory default configuration? This will clear the NVS memory partition (wiping names, channel labels, custom ordering, and system configurations) and reboot the controller board.")) {
-        writeSerial(`RESET_CFG;pass=${deviceAdminPass}`);
+        writeSerial("RESET_CFG");
       }
     };
 
     document.getElementById("btn-reboot-header").onclick = async () => {
       if (!port) return;
       if (confirm("Reboot the Osprey Controller device now?")) {
-        writeSerial(`REBOOT;pass=${deviceAdminPass}`);
+        writeSerial("REBOOT");
       }
     };
 
